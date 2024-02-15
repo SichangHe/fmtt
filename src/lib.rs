@@ -1,11 +1,11 @@
 use tracing::debug;
 
-pub fn format(text: &str) -> Vec<&str> {
+pub fn format(text: &str, line_width: usize) -> Vec<&str> {
     let mut result = Vec::with_capacity(text.len() / 32);
 
     for paragraph in ParagraphsIter::new(text) {
         debug!(?paragraph);
-        result.extend(paragraph.format());
+        result.extend(paragraph.format(line_width));
     }
 
     result
@@ -78,22 +78,21 @@ pub const SPACES: &str =
     "                                                                                                                                                                                                                                                                ";
 
 impl<'a> Paragraph<'a> {
-    pub fn format(&self) -> Vec<&'a str> {
+    pub fn format(&self, line_width: usize) -> Vec<&'a str> {
         if self.words.is_empty() {
             return vec!["\n"];
         }
 
         let mut result = Vec::with_capacity(self.words.len() / 32);
 
-        self.inner_format(&mut result);
+        self.inner_format(line_width, &mut result);
 
         result
     }
 
     #[inline(always)]
-    fn inner_format(&self, result: &mut Vec<&'a str>) {
-        // TODO: Make configurable.
-        let line_width = 80 + 1 - self.indentation;
+    fn inner_format(&self, line_width: usize, result: &mut Vec<&'a str>) {
+        let line_width = line_width + 1 - self.indentation;
 
         let mut split_point = 0;
         let mut to_be_split = Vec::with_capacity(line_width / 2);

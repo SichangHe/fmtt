@@ -25,7 +25,7 @@ fn bracket() {
 "#
     .trim_start();
 
-    let formatted = format(input).join("");
+    let formatted = format(input, 80).join("");
     println!("{formatted}");
     assert_eq!(&formatted, expected);
 }
@@ -61,7 +61,7 @@ sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
 
-    let formatted = format(input).join("");
+    let formatted = format(input, 80).join("");
     println!("{formatted}");
     assert_eq!(&formatted, expected);
 }
@@ -83,7 +83,7 @@ sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
 
-    let formatted = format(input).join("");
+    let formatted = format(input, 80).join("");
     println!("{formatted}");
     assert_eq!(&formatted, expected);
 }
