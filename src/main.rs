@@ -3,8 +3,13 @@ use std::io::*;
 use anyhow::Result;
 
 use fmtt::*;
+use tracing_subscriber::EnvFilter;
 
 fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+
     let mut input = Vec::with_capacity(4096);
     let mut std_in = BufReader::new(stdin());
     let mut std_out = BufWriter::new(stdout());

@@ -1,7 +1,10 @@
+use tracing::debug;
+
 pub fn format(text: &str) -> Vec<&str> {
     let mut result = Vec::with_capacity(text.len() / 32);
 
     for paragraph in ParagraphsIter::new(text) {
+        debug!(?paragraph);
         result.extend(paragraph.format());
     }
 
@@ -30,7 +33,6 @@ impl<'a> Iterator for ParagraphsIter<'a> {
                 words: "",
             });
         }
-        // self.text = self.text.trim_start_matches('\n');
 
         if self.text.is_empty() {
             return None;
@@ -51,7 +53,7 @@ impl<'a> Iterator for ParagraphsIter<'a> {
                     return yielded;
                 }
             };
-            new_line_index_relative_to_original += new_line_index;
+            new_line_index_relative_to_original += new_line_index + 1;
 
             following_text = &following_text[(new_line_index + 1)..];
             if following_text.starts_with('\n') || get_indentation(following_text) != indentation {
