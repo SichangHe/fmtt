@@ -2,6 +2,9 @@
 name = "fmtt"
 version = "0.1.0"
 edition = "2021"
+description = "A stupid text formatter that tries to break lines on sensible punctuations."
+license = "MIT"
+repository = "https://github.com/SichangHe/fmtt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +13,7 @@ anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
