@@ -6,6 +6,12 @@ This is more useful to use with Git than `fmt` because the formatting is more co
 
 - Limited support for abbreviations using heuristics.
 
+## Installation
+
+```sh
+cargo install fmtt
+```
+
 ## Usage
 
 ```sh
