@@ -4,6 +4,24 @@ use tracing_subscriber::EnvFilter;
 use super::*;
 
 #[test]
+fn abbr() {
+    init_tracing();
+
+    let input = r#"
+I asked (emailed Prof. He Who Must Not Be Named and CCed Prof. YouKnowWho). The former has a budget of 7500, and the latter 5000.
+"#.trim_start();
+    let expected = r#"
+I asked (emailed Prof. He Who Must Not Be Named and CCed Prof. YouKnowWho).
+The former has a budget of 7500, and the latter 5000.
+"#
+    .trim_start();
+
+    let formatted = format(input, 80).join("");
+    println!("{formatted}");
+    assert_eq!(&formatted, expected);
+}
+
+#[test]
 fn bracket() {
     init_tracing();
 
@@ -86,6 +104,20 @@ sunt in culpa qui officia deserunt mollit anim id est laborum.
     let formatted = format(input, 80).join("");
     println!("{formatted}");
     assert_eq!(&formatted, expected);
+}
+
+#[test]
+fn split_point_words() {
+    assert!(is_split_point_word("and,"));
+    assert!(is_split_point_word("Or,"));
+    assert!(is_split_point_word("A..Z."));
+    assert!(is_split_point_word("Black)."));
+    assert!(is_split_point_word("I18n."));
+    assert!(is_split_point_word("A.n."));
+    assert!(!is_split_point_word("Mr."));
+    assert!(!is_split_point_word("Ph.D."));
+    assert!(!is_split_point_word("A.K.A."));
+    assert!(!is_split_point_word("U.S."));
 }
 
 #[test]

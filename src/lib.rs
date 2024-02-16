@@ -131,19 +131,49 @@ impl<'a> Paragraph<'a> {
             }
 
             to_be_split.push(split);
-            if let (Some(first_char), Some(last_char)) =
-                (split.chars().next(), split.chars().next_back())
-            {
-                if is_sub_sentence_separator(last_char) && !first_char.is_uppercase() {
-                    split_point = to_be_split.len();
-                    n_char_after_split_point = 0;
-                }
+            if is_split_point_word(split) {
+                split_point = to_be_split.len();
+                n_char_after_split_point = 0;
             }
         }
 
         if !to_be_split.is_empty() {
             push_line!(to_be_split.drain(..));
         }
+    }
+}
+
+/// Whether a word ends with a split point.
+/// Handles abbreviations using heuristics.
+fn is_split_point_word(word: &str) -> bool {
+    let mut chars = word.chars();
+    match chars.next_back() {
+        Some('.') => {
+            // Ends with a `.` and starts with an uppercase character.
+            match chars.next() {
+                Some(first_char) if first_char.is_uppercase() => {
+                    // Avoid abbreviations.
+                    let mut need_capital = false;
+                    for char in chars {
+                        match (need_capital, char) {
+                            // `..`
+                            (true, '.') => return true,
+                            (_, '.') => need_capital = true,
+                            (true, char) if char.is_uppercase() => need_capital = false,
+                            // Non-capital letters following `.`
+                            (true, _) => return true,
+                            (false, char) if char.is_alphabetic() => {}
+                            (false, _) => return true,
+                        }
+                    }
+
+                    false
+                }
+                _ => true,
+            }
+        }
+        Some(last_char) if is_sub_sentence_separator(last_char) => true,
+        _ => false,
     }
 }
 
