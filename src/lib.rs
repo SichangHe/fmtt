@@ -52,10 +52,10 @@ impl<'a> Iterator for ParagraphsIter<'a> {
                     self.text = "";
                     return yielded;
                 }
-            };
-            new_line_index_relative_to_original += new_line_index + 1;
+            }+1;
+            new_line_index_relative_to_original += new_line_index;
 
-            following_text = &following_text[(new_line_index + 1)..];
+            following_text = &following_text[new_line_index..];
             if following_text.starts_with('\n') || get_indentation(following_text) != indentation {
                 let yielded = Some(Paragraph {
                     indentation,
