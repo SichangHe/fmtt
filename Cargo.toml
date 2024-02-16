@@ -1,6 +1,6 @@
 [package]
 name = "fmtt"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A stupid text formatter that tries to break lines on sensible punctuations."
 license = "MIT"
