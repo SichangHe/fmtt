@@ -1,4 +1,4 @@
-use tracing::debug;
+use tracing::{debug, trace};
 
 pub fn format(text: &str, line_width: usize) -> Vec<&str> {
     let mut result = Vec::with_capacity(text.len() / 32);
@@ -52,7 +52,7 @@ impl<'a> Iterator for ParagraphsIter<'a> {
                     self.text = "";
                     return yielded;
                 }
-            }+1;
+            } + 1;
             new_line_index_relative_to_original += new_line_index;
 
             following_text = &following_text[new_line_index..];
@@ -107,6 +107,8 @@ impl<'a> Paragraph<'a> {
                     result.push(" ");
                 }
                 result.pop();
+
+                debug!("Last word in line: {:?}.", result.last());
                 result.push("\n");
             };
         }
@@ -116,7 +118,9 @@ impl<'a> Paragraph<'a> {
 
             n_char += split_len;
             n_char_after_split_point += split_len;
-            if n_char > line_width {
+            trace!(n_char, n_char_after_split_point, split, split_point);
+
+            while n_char > line_width {
                 match split_point {
                     0 => {
                         push_line!(to_be_split.drain(..));

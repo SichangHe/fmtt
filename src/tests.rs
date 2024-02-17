@@ -4,6 +4,25 @@ use tracing_subscriber::EnvFilter;
 use super::*;
 
 #[test]
+fn backtick() {
+    init_tracing();
+
+    let input = r#"
+First, I updated the `DATASET_URL` environment variable for the ML container in `k8s-tasks.yml` to point to the second dataset rather than the first.
+"#.trim_start();
+    let expected = r#"
+First,
+I updated the `DATASET_URL` environment variable for the ML container in
+`k8s-tasks.yml` to point to the second dataset rather than the first.
+"#
+    .trim_start();
+
+    let formatted = format(input, 80).join("");
+    println!("{formatted}");
+    assert_eq!(&formatted, expected);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
 
