@@ -120,7 +120,7 @@ impl<'a> Paragraph<'a> {
             n_char_after_split_point += split_len;
             trace!(n_char, n_char_after_split_point, split, split_point);
 
-            while n_char > line_width {
+            while n_char > line_width && !to_be_split.is_empty() {
                 match split_point {
                     0 => {
                         push_line!(to_be_split.drain(..));

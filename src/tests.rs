@@ -4,6 +4,25 @@ use tracing_subscriber::EnvFilter;
 use super::*;
 
 #[test]
+fn long_word() {
+    init_tracing();
+
+    let input = r#"
+But, it chokes at very long splits such as `this_function_does_absolutely_nothing_i_am_afraid_but_it_needs_to_be_here_or_the_program_breaks`.
+"#.trim_start();
+    let expected = r#"
+But,
+it chokes at very long splits such as
+`this_function_does_absolutely_nothing_i_am_afraid_but_it_needs_to_be_here_or_the_program_breaks`.
+"#
+    .trim_start();
+
+    let formatted = format(input, 80).join("");
+    println!("{formatted}");
+    assert_eq!(&formatted, expected);
+}
+
+#[test]
 fn backtick() {
     init_tracing();
 
