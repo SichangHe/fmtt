@@ -230,11 +230,11 @@ fn correct_indentation() {
 }
 
 fn init_tracing() {
-    tracing_subscriber::fmt()
+    _ = tracing_subscriber::fmt()
         .with_env_filter(
             EnvFilter::builder()
                 .with_default_directive(Level::INFO.into())
                 .from_env_lossy(),
         )
-        .init();
+        .try_init();
 }
