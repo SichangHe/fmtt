@@ -207,10 +207,14 @@ fn split_point_words() {
     assert!(is_split_point_word("Black)."));
     assert!(is_split_point_word("I18n."));
     assert!(is_split_point_word("A.n."));
+    assert!(is_split_point_word("Program."));
+    assert!(is_split_point_word("HMM."));
     assert!(!is_split_point_word("Mr."));
     assert!(!is_split_point_word("Ph.D."));
     assert!(!is_split_point_word("A.K.A."));
     assert!(!is_split_point_word("U.S."));
+    assert!(!is_split_point_word("Assoc."));
+    assert!(!is_split_point_word("Prof."));
 }
 
 #[test]

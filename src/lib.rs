@@ -147,6 +147,8 @@ impl<'a> Paragraph<'a> {
     }
 }
 
+const MAX_ABBR_LEN: usize = 5;
+
 /// Whether a word ends with a split point.
 /// Handles abbreviations using heuristics.
 fn is_split_point_word(word: &str) -> bool {
@@ -157,17 +159,20 @@ fn is_split_point_word(word: &str) -> bool {
             match chars.next() {
                 Some(first_char) if first_char.is_uppercase() => {
                     // Avoid abbreviations.
-                    let mut need_capital = false;
+                    let mut word_len = 1;
+                    // The rest of the characters, starting with the 2nd one.
                     for char in chars {
-                        match (need_capital, char) {
+                        match (word_len, char) {
                             // `..`
-                            (true, '.') => return true,
-                            (_, '.') => need_capital = true,
-                            (true, char) if char.is_uppercase() => need_capital = false,
+                            (0, '.') => return true,
+                            (_, '.') => word_len = 0,
+                            (0, char) if char.is_uppercase() => word_len = 1,
                             // Non-capital letters following `.`
-                            (true, _) => return true,
-                            (false, char) if char.is_alphabetic() => {}
-                            (false, _) => return true,
+                            (0, _) => return true,
+                            (_, char) if word_len < MAX_ABBR_LEN && char.is_lowercase() => {
+                                word_len += 1
+                            }
+                            (_, _) => return true,
                         }
                     }
 
