@@ -35,6 +35,20 @@ As a matter of fact (or, rather as factually as I know or to the extent of my kn
 }
 
 #[test]
+fn extra_line_breaks() {
+    init_tracing();
+    let input = r#"
+
+Blah.
+
+Blah blah blah.
+
+"#;
+    let formatted = format(input, 80).join("");
+    assert_snapshot!(&formatted);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
     let input = r#"
