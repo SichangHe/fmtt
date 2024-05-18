@@ -8,27 +8,23 @@ impl<'a> ParagraphsIter<'a> {
     pub fn new(text: &'a str) -> Self {
         Self { text }
     }
-}
 
-impl<'a> Iterator for ParagraphsIter<'a> {
-    type Item = Paragraph<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    fn maybe_yield_start_new_lines(&mut self) -> Option<Paragraph<'static>> {
         let trimmed_start_new_lines = self.text.trim_start_matches('\n');
         if trimmed_start_new_lines.len() != self.text.len() {
             self.text = trimmed_start_new_lines;
-            return Some(Paragraph {
+            Some(Paragraph {
                 indentation: 0,
                 words: "",
-            });
+            })
+        } else {
+            None
         }
+    }
 
-        if self.text.is_empty() {
-            return None;
-        }
-
+    fn inner_next(&mut self) -> Option<Paragraph<'a>> {
         let mut following_text = self.text;
-        let indentation = get_indentation(self.text);
+        let indentation = first_line_indentation(self.text);
         let mut new_line_index_relative_to_original = 0;
         loop {
             let new_line_index = match following_text.find('\n') {
@@ -45,7 +41,9 @@ impl<'a> Iterator for ParagraphsIter<'a> {
             new_line_index_relative_to_original += new_line_index;
 
             following_text = &following_text[new_line_index..];
-            if following_text.starts_with('\n') || get_indentation(following_text) != indentation {
+            if following_text.starts_with('\n')
+                || first_line_indentation(following_text) != indentation
+            {
                 let yielded = Some(Paragraph {
                     indentation,
                     words: &self.text[..new_line_index_relative_to_original],
@@ -57,10 +55,28 @@ impl<'a> Iterator for ParagraphsIter<'a> {
     }
 }
 
-pub fn get_indentation(line: &str) -> usize {
+impl<'a> Iterator for ParagraphsIter<'a> {
+    type Item = Paragraph<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let paragraph @ Some(_) = self.maybe_yield_start_new_lines() {
+            return paragraph;
+        }
+
+        if self.text.is_empty() {
+            return None;
+        }
+
+        self.inner_next()
+    }
+}
+
+pub fn first_line_indentation(line: &str) -> usize {
     for (index, char) in line.chars().enumerate() {
-        if char != ' ' {
-            return index;
+        match char {
+            ' ' => {}
+            '\n' => return 0,
+            _ => return index,
         }
     }
 

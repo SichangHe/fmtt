@@ -126,18 +126,18 @@ fn split_point_words() {
 
 #[test]
 fn correct_indentation() {
-    assert_eq!(get_indentation("blah"), 0);
-    assert_eq!(get_indentation("blah\n"), 0);
-    assert_eq!(get_indentation("blah blah\n"), 0);
-    assert_eq!(get_indentation("blah blah \n"), 0);
+    assert_eq!(first_line_indentation("blah"), 0);
+    assert_eq!(first_line_indentation("blah\n"), 0);
+    assert_eq!(first_line_indentation("blah blah\n"), 0);
+    assert_eq!(first_line_indentation("blah blah \n"), 0);
 
-    assert_eq!(get_indentation("    \n"), 4);
-    assert_eq!(get_indentation("    a\n"), 4);
-    assert_eq!(get_indentation("    "), 0);
+    assert_eq!(first_line_indentation("    \n"), 0);
+    assert_eq!(first_line_indentation("    a\n"), 4);
+    assert_eq!(first_line_indentation("    "), 0);
 
-    assert_eq!(get_indentation("   \n"), 3);
-    assert_eq!(get_indentation("   a\n"), 3);
-    assert_eq!(get_indentation("   "), 0);
+    assert_eq!(first_line_indentation("   \n"), 0);
+    assert_eq!(first_line_indentation("   a\n"), 3);
+    assert_eq!(first_line_indentation("   "), 0);
 }
 
 fn init_tracing() {
