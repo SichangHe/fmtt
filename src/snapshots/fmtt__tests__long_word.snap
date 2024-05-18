@@ -1,0 +1,7 @@
+---
+source: src/tests.rs
+expression: "&formatted"
+---
+But,
+it chokes at very long splits such as
+`this_function_does_absolutely_nothing_i_am_afraid_but_it_needs_to_be_here_or_the_program_breaks`.

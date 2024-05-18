@@ -1,0 +1,10 @@
+---
+source: src/tests.rs
+expression: "&formatted"
+---
+\begin{figure}
+    \centering \includegraphics[width=0.9\linewidth]{figs/fig-name.pdf}
+    \caption{Lorem ipsum dolor sit amet,
+    qui minim labore adipisicing minim sint cillum sint consectetur
+    cupidatat.\texdtbf{lorem ipsum dolor sit amet}} \label{fig:lorem}
+\end{figure}
