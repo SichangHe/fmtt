@@ -57,6 +57,16 @@ impl<'a> Iterator for ParagraphsIter<'a> {
     }
 }
 
+pub fn get_indentation(line: &str) -> usize {
+    for (index, char) in line.chars().enumerate() {
+        if char != ' ' {
+            return index;
+        }
+    }
+
+    0
+}
+
 #[derive(Clone, Debug)]
 pub struct Paragraph<'a> {
     pub indentation: usize,
