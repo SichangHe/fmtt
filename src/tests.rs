@@ -82,7 +82,8 @@ Meanwhile,
 the Research and Development team is deeply immersed in the execution of a
 project shrouded in secrecy,
 with the exact estimated time of arrival for the project launch yet to be
-determined! Additionally,
+determined!
+Additionally,
 the Human Resources department requires your date of birth for the forthcoming
 birthday celebration,
 an event exclusively reserved for individuals of paramount importance,
@@ -189,7 +190,8 @@ Ut enim ad minim veniam,
 quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 consequat.
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident,
 sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
@@ -201,20 +203,22 @@ sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 #[test]
 fn split_point_words() {
-    assert!(is_split_point_word("and,"));
-    assert!(is_split_point_word("Or,"));
-    assert!(is_split_point_word("A..Z."));
-    assert!(is_split_point_word("Black)."));
-    assert!(is_split_point_word("I18n."));
-    assert!(is_split_point_word("A.n."));
-    assert!(is_split_point_word("Program."));
-    assert!(is_split_point_word("HMM."));
-    assert!(!is_split_point_word("Mr."));
-    assert!(!is_split_point_word("Ph.D."));
-    assert!(!is_split_point_word("A.K.A."));
-    assert!(!is_split_point_word("U.S."));
-    assert!(!is_split_point_word("Assoc."));
-    assert!(!is_split_point_word("Prof."));
+    use SentencePosition::*;
+    assert_eq!(SubEnd, word_sentence_position("and,"));
+    assert_eq!(SubEnd, word_sentence_position("Or,"));
+    assert_eq!(SubEnd, word_sentence_position("so)"));
+    assert_eq!(End, word_sentence_position("A..Z."));
+    assert_eq!(End, word_sentence_position("Black)."));
+    assert_eq!(End, word_sentence_position("I18n."));
+    assert_eq!(End, word_sentence_position("A.n."));
+    assert_eq!(End, word_sentence_position("Program."));
+    assert_eq!(End, word_sentence_position("HMM."));
+    assert_eq!(Other, word_sentence_position("Mr."));
+    assert_eq!(Other, word_sentence_position("Ph.D."));
+    assert_eq!(Other, word_sentence_position("A.K.A."));
+    assert_eq!(Other, word_sentence_position("U.S."));
+    assert_eq!(Other, word_sentence_position("Assoc."));
+    assert_eq!(Other, word_sentence_position("Prof."));
 }
 
 #[test]

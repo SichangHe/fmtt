@@ -94,10 +94,9 @@ impl<'a> Paragraph<'a> {
     fn inner_format(&self, line_width: usize, result: &mut Vec<&'a str>) {
         let line_width = line_width + 1 - self.indentation;
 
-        let mut split_point = 0;
+        let mut split_points = SplitPoints::default();
         let mut to_be_split = Vec::with_capacity(line_width / 2);
         let mut n_char = 0;
-        let mut n_char_after_split_point = 0;
 
         macro_rules! push_line {
             ($pushed_words:expr) => {
@@ -116,29 +115,35 @@ impl<'a> Paragraph<'a> {
         for split in self.words.split_whitespace() {
             let split_len = split.chars().count() + 1;
 
+            to_be_split.push(split);
             n_char += split_len;
-            n_char_after_split_point += split_len;
-            trace!(n_char, n_char_after_split_point, split, split_point);
+            trace!(split, n_char, ?split_points, ?to_be_split);
 
-            while n_char > line_width && !to_be_split.is_empty() {
-                match split_point {
-                    0 => {
-                        push_line!(to_be_split.drain(..));
-                        n_char_after_split_point = split_len;
+            for _try in 0usize..2 {
+                if n_char <= line_width || to_be_split.is_empty() {
+                    break;
+                }
+                match split_points.next() {
+                    None => {
+                        let last_index = to_be_split.len().saturating_sub(1);
+                        push_line!(to_be_split.drain(..last_index));
+                        split_points.reset();
+                        n_char = split_len;
                     }
-                    _ => {
-                        push_line!(to_be_split.drain(..split_point));
-                        split_point = 0;
+                    Some(
+                        split_point @ SplitPoint {
+                            index,
+                            n_char_after,
+                        },
+                    ) => {
+                        trace!(?split_point, "next");
+                        push_line!(to_be_split.drain(..index));
+                        n_char = n_char_after + split_len;
                     }
                 }
-                n_char = n_char_after_split_point;
             }
 
-            to_be_split.push(split);
-            if is_split_point_word(split) {
-                split_point = to_be_split.len();
-                n_char_after_split_point = 0;
-            }
+            split_points.register_split(split, split_len, to_be_split.len());
         }
 
         if !to_be_split.is_empty() {
@@ -147,16 +152,112 @@ impl<'a> Paragraph<'a> {
     }
 }
 
+#[derive(Copy, Clone, Debug, Default)]
+pub struct SplitPoints {
+    pub sub_start: SplitPoint,
+    pub end: SplitPoint,
+    pub sub_end: SplitPoint,
+}
+
+impl SplitPoints {
+    /// Register chosen a split point with `n_char_after` characters after it.
+    fn register_n_char_after(&mut self, n_char_after: usize) {
+        for part in self.parts_ordered_mut() {
+            if part.n_char_after >= n_char_after {
+                // This split point was before the chosen one,
+                // so it is now invalid.
+                part.index = 0;
+            } else {
+                // This split point was after the chosen one,
+                // so it is unaffected.
+            }
+        }
+    }
+
+    /// Signal that `reduction` number of splits have been consumed.
+    fn reduce_index(&mut self, reduction: usize) {
+        for part in self.parts_ordered_mut() {
+            part.index = part.index.saturating_sub(reduction);
+        }
+    }
+
+    pub fn parts_ordered_mut(&mut self) -> [&mut SplitPoint; 3] {
+        [&mut self.end, &mut self.sub_end, &mut self.sub_start]
+    }
+
+    pub fn register_split(&mut self, split: &str, split_len: usize, n_split: usize) {
+        for part in self.parts_ordered_mut() {
+            part.n_char_after += split_len;
+        }
+        match word_sentence_position(split) {
+            SentencePosition::End => {
+                self.end.index = n_split;
+                self.end.n_char_after = 0;
+            }
+            SentencePosition::SubEnd => {
+                self.sub_end.index = n_split;
+                self.sub_end.n_char_after = 0;
+            }
+            SentencePosition::SubStart => {
+                self.sub_start.index = n_split.saturating_sub(1);
+                self.sub_start.n_char_after = split_len;
+            }
+            SentencePosition::Other => {}
+        }
+    }
+
+    pub fn reset(&mut self) {
+        *self = Self::default()
+    }
+}
+
+impl Iterator for SplitPoints {
+    type Item = SplitPoint;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let maybe_best_split_point = self
+            .parts_ordered_mut()
+            .into_iter()
+            .filter(|split_point| split_point.index > 0)
+            .map(|split_point| *split_point)
+            .next();
+        maybe_best_split_point.map(
+            |split_point @ SplitPoint {
+                 index,
+                 n_char_after,
+             }| {
+                self.reduce_index(index);
+                self.register_n_char_after(n_char_after);
+                split_point
+            },
+        )
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct SplitPoint {
+    pub index: usize,
+    pub n_char_after: usize,
+}
+
+impl SplitPoint {
+    /* pub fn set_n_char(&mut self, n_char: usize) {
+        self.index = n_char;
+        self.n_char_after = n_char;
+    } */
+}
+
 const MAX_ABBR_LEN: usize = 5;
 
 /// Whether a word ends with a split point.
 /// Handles abbreviations using heuristics.
-fn is_split_point_word(word: &str) -> bool {
+fn word_sentence_position(word: &str) -> SentencePosition {
+    use SentencePosition::*;
     let mut chars = word.chars();
     match chars.next_back() {
         Some('.') => {
-            // Ends with a `.` and starts with an uppercase character.
             match chars.next() {
+                // Ends with a `.` and starts with an uppercase character.
                 Some(first_char) if first_char.is_uppercase() => {
                     // Avoid abbreviations.
                     let mut word_len = 1;
@@ -164,50 +265,58 @@ fn is_split_point_word(word: &str) -> bool {
                     for char in chars {
                         match (word_len, char) {
                             // `..`
-                            (0, '.') => return true,
+                            (0, '.') => return End,
                             (_, '.') => word_len = 0,
                             (0, char) if char.is_uppercase() => word_len = 1,
                             // Non-capital letters following `.`
-                            (0, _) => return true,
+                            (0, _) => return End,
                             (_, char) if word_len < MAX_ABBR_LEN && char.is_lowercase() => {
                                 word_len += 1
                             }
-                            (_, _) => return true,
+                            (_, _) => return End,
                         }
                     }
 
-                    false
+                    Other
                 }
-                _ => true,
+                // Ends with a `.` and does not start with an uppercase
+                // character.
+                _ => End,
             }
         }
-        Some(last_char) if is_sub_sentence_separator(last_char) => true,
-        _ => false,
+        Some(last_char) if is_sentence_separator(last_char) => End,
+        Some(last_char) if is_sub_sentence_separator(last_char) => SubEnd,
+        _ => Other,
     }
+}
+
+fn is_sentence_separator(char: char) -> bool {
+    matches!(char, '.' | '!' | '?' | '…' | '。' | '，' | '？' | '！')
 }
 
 fn is_sub_sentence_separator(char: char) -> bool {
     matches!(
         char,
-        ',' | '.'
-            | '!'
-            | '?'
-            | ';'
-            | '…'
-            | ':'
-            | '。'
-            | '，'
-            | '？'
-            | '！'
-            | '：'
-            | '；'
-            | ')'
-            | '）'
-            | '}'
-            | '｝'
-            | ']'
-            | '］'
+        ',' | ';' | ':' | '，' | '：' | '；' | ')' | '）' | '}' | '｝' | ']' | '］'
     )
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum SentencePosition {
+    /// Start of a sub-sentence.
+    SubStart,
+    /// End of a sentence.
+    End,
+    /// Start of a sub-sentence.
+    SubEnd,
+    /// Not a special sentence position.
+    Other,
+}
+
+impl Default for SentencePosition {
+    fn default() -> Self {
+        Self::Other
+    }
 }
 
 pub fn get_indentation(line: &str) -> usize {

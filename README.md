@@ -5,6 +5,7 @@ A text formatter that tries to break lines on sensible punctuations.
 This is more useful to use with Git than `fmt` because the formatting is more consistent, resulting in smaller diffs.
 
 - Limited support for abbreviations using heuristics.
+- Prioritize splitting on sentence ends like `.`, then sub-sentence ends like `,`.
 
 ## Installation
 
@@ -76,7 +77,8 @@ Meanwhile,
 the Research and Development team is deeply immersed in the execution of a
 project shrouded in secrecy,
 with the exact estimated time of arrival for the project launch yet to be
-determined! Additionally,
+determined!
+Additionally,
 the Human Resources department requires your date of birth for the forthcoming
 birthday celebration,
 an event exclusively reserved for individuals of paramount importance,
