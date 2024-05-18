@@ -83,4 +83,39 @@ struct App {
         help = "If input file is provided, write output to it."
     )]
     change_in_place: bool,
+
+    // TODO: Implement.
+    #[arg(
+        short = 'p',
+        long,
+        default_value = "false",
+        help = r#"
+Allow indented paragraphs.
+If not set, any change indentation changes start a new paragraph."#
+    )]
+    allow_indented_paragraphs: bool,
+
+    // TODO: Implement.
+    #[arg(
+        short,
+        long,
+        default_value = "false",
+        help = r#"
+Treat `#`-started lines as single paragraphs;
+treat `-`/`*` started lines as paragraph starts.
+Useful for Markdown, especially with `-p`."#
+    )]
+    markdown_friendly: bool,
+
+    // TODO: Implement.
+    #[arg(
+        short,
+        long,
+        default_value = "false",
+        help = r#"
+Ignore `%`-started lines;
+treat `\` started lines as paragraph starts.
+Useful for LaTeX."#
+    )]
+    latex_friendly: bool,
 }
