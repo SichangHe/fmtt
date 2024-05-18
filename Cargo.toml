@@ -1,8 +1,8 @@
 [package]
 name = "fmtt"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
-description = "A stupid text formatter that tries to break lines on sensible punctuations."
+description = "A diff-friendly text formatter that breaks lines on sensible punctuations and words to fit a line width."
 license = "MIT"
 repository = "https://github.com/SichangHe/fmtt"
 
@@ -11,13 +11,15 @@ repository = "https://github.com/SichangHe/fmtt"
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
-insta = "1.39"
 tracing = { version = "0.1", default_features = false }
 tracing-subscriber = { version = "0.3", default_features = false, features = [
     "env-filter",
     "fmt",
     "smallvec",
 ] }
+
+[dev-dependencies]
+insta = "1.39"
 
 [profile.release]
 opt-level = "s"

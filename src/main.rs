@@ -49,15 +49,38 @@ fn write_all(to: impl Write, formatted: &[&str]) -> Result<()> {
 #[command(
     version,
     about,
-    long_about = "A stupid text formatter that tries to break lines on sensible punctuations."
+    long_about = r#"
+ForMaT Text diff-friendly,
+breaking lines on sensible punctuations and words to fit a line width.
+
+Like fmt, FMTT is a text formatter;
+it formats its input to have lines shorter than the line width limit
+(if possible).
+It reads an input file or StdIn and prints the formatted text to StdOut.
+Like LaTeX,
+FMTT does not distinguish different whitespaces or their amount except for
+double line breaks; it only preserves leading spaces, not tabs.
+
+This help message is formatted using FMTT itself as an example.
+"#
 )]
 struct App {
-    #[arg(short, long, default_value = "80")]
+    #[arg(
+        short = 'w',
+        long,
+        default_value = "80",
+        help = "Maximum line width limit."
+    )]
     line_width: usize,
 
-    #[arg(short, long)]
+    #[arg(short, long, help = "Name of input file; if omitted, read from StdIn.")]
     filename: Option<PathBuf>,
 
-    #[arg(short, long, default_value = "false")]
+    #[arg(
+        short,
+        long,
+        default_value = "false",
+        help = "If input file is provided, write output to it."
+    )]
     change_in_place: bool,
 }
