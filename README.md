@@ -1,11 +1,16 @@
 # ForMaT Text
 
-A text formatter that tries to break lines on sensible punctuations.
+A diff-friendly text formatter that tries to break lines on sensible punctuations and words to fit into a line width.
 
 This is more useful to use with Git than `fmt` because the formatting is more consistent, resulting in smaller diffs.
 
+- Respect line width limit.
+- Prioritize splitting on
+    1. sentence ends like `.`, then
+    1. sub-sentence ends like `,`, then
+    1. sub-sentence starts like `(`, and finally
+    1. sentence-connection words like `and`.
 - Limited support for abbreviations using heuristics.
-- Prioritize splitting on sentence ends like `.`, then sub-sentence ends like `,`, then sub-sentence starts like `(`.
 
 ## Installation
 

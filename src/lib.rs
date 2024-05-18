@@ -159,6 +159,7 @@ pub struct SplitPoints {
     pub sub_start: SplitPoint,
     pub end: SplitPoint,
     pub sub_end: SplitPoint,
+    pub connection_word: SplitPoint,
 }
 
 impl SplitPoints {
@@ -183,8 +184,13 @@ impl SplitPoints {
         }
     }
 
-    pub fn parts_ordered_mut(&mut self) -> [&mut SplitPoint; 3] {
-        [&mut self.end, &mut self.sub_end, &mut self.sub_start]
+    pub fn parts_ordered_mut(&mut self) -> [&mut SplitPoint; 4] {
+        [
+            &mut self.end,
+            &mut self.sub_end,
+            &mut self.sub_start,
+            &mut self.connection_word,
+        ]
     }
 
     pub fn register_split(&mut self, split: &str, split_len: usize, n_split: usize) {
@@ -203,6 +209,10 @@ impl SplitPoints {
             SentencePosition::SubStart => {
                 self.sub_start.index = n_split.saturating_sub(1);
                 self.sub_start.n_char_after = split_len;
+            }
+            SentencePosition::ConnectionWord => {
+                self.connection_word.index = n_split;
+                self.connection_word.n_char_after = 0;
             }
             SentencePosition::Other => {}
         }
@@ -242,34 +252,26 @@ pub struct SplitPoint {
     pub n_char_after: usize,
 }
 
-impl SplitPoint {
-    /* pub fn set_n_char(&mut self, n_char: usize) {
-        self.index = n_char;
-        self.n_char_after = n_char;
-    } */
-}
-
 const MAX_ABBR_LEN: usize = 5;
 
 /// Whether a word ends with a split point.
 /// Handles abbreviations using heuristics.
 fn word_sentence_position(word: &str) -> SentencePosition {
     use SentencePosition::*;
-    let start_check_result = match word.chars().next() {
-        Some(first_char) if is_sub_sentence_start(first_char) => SubStart,
-        _ => Other,
+    match word.chars().next() {
+        Some(first_char) if is_sub_sentence_start(first_char) => return SubStart,
+        _ => {}
     };
-    match start_check_result {
-        Other => {
-            let mut chars = word.chars();
-            match chars.next_back() {
-                Some('.') if is_abbreviation(&mut chars) => Other,
-                Some(last_char) if is_sentence_separator(last_char) => End,
-                Some(last_char) if is_sub_sentence_separator(last_char) => SubEnd,
-                _ => Other,
-            }
-        }
-        _ => start_check_result,
+    let mut chars = word.chars();
+    match chars.next_back() {
+        Some('.') if is_abbreviation(&mut chars) => {}
+        Some(last_char) if is_sentence_separator(last_char) => return End,
+        Some(last_char) if is_sub_sentence_separator(last_char) => return SubEnd,
+        _ => {}
+    }
+    match is_connection_word(word) {
+        true => ConnectionWord,
+        false => Other,
     }
 }
 
@@ -317,6 +319,34 @@ fn is_sub_sentence_start(char: char) -> bool {
     )
 }
 
+fn is_connection_word(word: &str) -> bool {
+    matches!(
+        word,
+        "and"
+            | "or"
+            | "but"
+            | "except"
+            | "that"
+            | "which"
+            | "who"
+            | "where"
+            | "when"
+            | "while"
+            | "though"
+            | "although"
+            | "in"
+            | "on"
+            | "of"
+            | "by"
+            | "for"
+            | "from"
+            | "to"
+            | "through"
+            | "with"
+            | "via"
+    )
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum SentencePosition {
     /// Start of a sub-sentence.
@@ -325,6 +355,8 @@ pub enum SentencePosition {
     End,
     /// Start of a sub-sentence.
     SubEnd,
+    /// Word to connect different parts of a sentence.
+    ConnectionWord,
     /// Not a special sentence position.
     Other,
 }
