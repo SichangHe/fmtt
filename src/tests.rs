@@ -4,13 +4,17 @@ use tracing_subscriber::EnvFilter;
 
 use super::*;
 
+fn default_format(text: &str) -> String {
+    format(text, 80, false).join("")
+}
+
 #[test]
 fn long_word() {
     init_tracing();
     let input = r#"
 But, it chokes at very long splits such as `this_function_does_absolutely_nothing_i_am_afraid_but_it_needs_to_be_here_or_the_program_breaks`.
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -20,7 +24,7 @@ fn backtick() {
     let input = r#"
 First, I updated the `DATASET_URL` environment variable for the ML container in `k8s-tasks.yml` to point to the second dataset rather than the first.
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -30,7 +34,7 @@ fn parentheses() {
     let input = r#"
 As a matter of fact (or, rather as factually as I know or to the extent of my knowledge), some people (maybe quite a lot of people, or just a few people, depending on who you ask) really love over-using parentheses (I might be one of those people, oh no what have I done…).
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -44,7 +48,7 @@ Blah.
 Blah blah blah.
 
 "#;
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -59,7 +63,7 @@ In preparation for the impending meeting, a thorough review of the key performan
 
 Meanwhile, the Research and Development team is deeply immersed in the execution of a project shrouded in secrecy, with the exact estimated time of arrival for the project launch yet to be determined! Additionally, the Human Resources department requires your date of birth for the forthcoming birthday celebration, an event exclusively reserved for individuals of paramount importance, and your immediate response for attendance is highly encouraged. Enjoy the festivities!
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -69,7 +73,7 @@ fn abbr() {
     let input = r#"
 I asked (emailed Prof. He Who Must Not Be Named and CCed Prof. YouKnowWho). The former has a budget of 7500, and the latter 5000.
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -84,7 +88,7 @@ fn bracket() {
     \label{fig:lorem}
 \end{figure}
 "#.trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 
@@ -104,7 +108,27 @@ consequat.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
+fn indented_and_allow_indented_paragraphs() {
+    init_tracing();
+    let input = r#"
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore
+et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat.
+    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+    fugiat nulla pariatur.
+
+
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+"#
+    .trim_start();
+    let formatted = format(input, 80, true).join("");
     assert_snapshot!(&formatted);
 }
 
@@ -112,7 +136,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 fn lorem() {
     init_tracing();
     let input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n";
-    let formatted = format(input, 80).join("");
+    let formatted = default_format(input);
     assert_snapshot!(&formatted);
 }
 

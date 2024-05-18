@@ -2,11 +2,15 @@ use super::*;
 
 pub struct ParagraphsIter<'a> {
     text: &'a str,
+    allow_indented_paragraphs: bool,
 }
 
 impl<'a> ParagraphsIter<'a> {
-    pub fn new(text: &'a str) -> Self {
-        Self { text }
+    pub fn new(text: &'a str, allow_indented_paragraphs: bool) -> Self {
+        Self {
+            text,
+            allow_indented_paragraphs,
+        }
     }
 
     /// Compress multiple starting line breaks into a single, if applicable.
@@ -35,7 +39,8 @@ impl<'a> ParagraphsIter<'a> {
         trace!(following_text, next_new_line_index);
         if following_text.is_empty()
             || following_text.starts_with('\n')
-            || first_line_indentation(following_text) != indentation
+            || (!self.allow_indented_paragraphs
+                && first_line_indentation(following_text) != indentation)
         {
             let yielded = Paragraph {
                 indentation,

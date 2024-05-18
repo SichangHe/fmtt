@@ -8,10 +8,10 @@ pub mod words;
 
 use {paragraphs::*, split_points::*, words::*};
 
-pub fn format(text: &str, line_width: usize) -> Vec<&str> {
+pub fn format(text: &str, line_width: usize, allow_indented_paragraphs: bool) -> Vec<&str> {
     let mut result = Vec::with_capacity(text.len() / 32);
 
-    for paragraph in ParagraphsIter::new(text) {
+    for paragraph in ParagraphsIter::new(text, allow_indented_paragraphs) {
         debug!(?paragraph);
         result.extend(paragraph.format(line_width));
     }

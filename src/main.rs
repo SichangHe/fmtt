@@ -17,7 +17,7 @@ fn main() -> Result<()> {
         read_all(stdin())?
     };
 
-    let formatted = format(&input, app.line_width);
+    let formatted = format(&input, app.line_width, app.allow_indented_paragraphs);
 
     if let (true, Some(filename)) = (app.change_in_place, &app.filename) {
         write_all(File::create(filename)?, &formatted)?;
@@ -84,7 +84,6 @@ struct App {
     )]
     change_in_place: bool,
 
-    // TODO: Implement.
     #[arg(
         short = 'p',
         long,
