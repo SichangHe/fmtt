@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 use tracing::{debug, trace};
 
 pub fn format(text: &str, line_width: usize) -> Vec<&str> {
@@ -253,40 +255,47 @@ const MAX_ABBR_LEN: usize = 5;
 /// Handles abbreviations using heuristics.
 fn word_sentence_position(word: &str) -> SentencePosition {
     use SentencePosition::*;
-    let mut chars = word.chars();
-    match chars.next_back() {
-        Some('.') => {
-            match chars.next() {
-                // Ends with a `.` and starts with an uppercase character.
-                Some(first_char) if first_char.is_uppercase() => {
-                    // Avoid abbreviations.
-                    let mut word_len = 1;
-                    // The rest of the characters, starting with the 2nd one.
-                    for char in chars {
-                        match (word_len, char) {
-                            // `..`
-                            (0, '.') => return End,
-                            (_, '.') => word_len = 0,
-                            (0, char) if char.is_uppercase() => word_len = 1,
-                            // Non-capital letters following `.`
-                            (0, _) => return End,
-                            (_, char) if word_len < MAX_ABBR_LEN && char.is_lowercase() => {
-                                word_len += 1
-                            }
-                            (_, _) => return End,
-                        }
-                    }
-
-                    Other
-                }
-                // Ends with a `.` and does not start with an uppercase
-                // character.
-                _ => End,
+    let start_check_result = match word.chars().next() {
+        Some(first_char) if is_sub_sentence_start(first_char) => SubStart,
+        _ => Other,
+    };
+    match start_check_result {
+        Other => {
+            let mut chars = word.chars();
+            match chars.next_back() {
+                Some('.') if is_abbreviation(&mut chars) => Other,
+                Some(last_char) if is_sentence_separator(last_char) => End,
+                Some(last_char) if is_sub_sentence_separator(last_char) => SubEnd,
+                _ => Other,
             }
         }
-        Some(last_char) if is_sentence_separator(last_char) => End,
-        Some(last_char) if is_sub_sentence_separator(last_char) => SubEnd,
-        _ => Other,
+        _ => start_check_result,
+    }
+}
+
+fn is_abbreviation(chars: &mut Chars) -> bool {
+    match chars.next() {
+        Some(first_char) if first_char.is_uppercase() => {
+            // Starts with an uppercase character.
+            let mut word_len = 1;
+            // The rest of the characters, starting with the 2nd one.
+            for char in chars {
+                match (word_len, char) {
+                    // `..`
+                    (0, '.') => return false,
+                    (_, '.') => word_len = 0,
+                    (0, char) if char.is_uppercase() => word_len = 1,
+                    // Non-capital letters following `.`
+                    (0, _) => return false,
+                    (_, char) if word_len < MAX_ABBR_LEN && char.is_lowercase() => word_len += 1,
+                    (_, _) => return false,
+                }
+            }
+
+            true
+        }
+        // Does not start with an uppercase character.
+        _ => false,
     }
 }
 
@@ -298,6 +307,13 @@ fn is_sub_sentence_separator(char: char) -> bool {
     matches!(
         char,
         ',' | ';' | ':' | '，' | '：' | '；' | ')' | '）' | '}' | '｝' | ']' | '］'
+    )
+}
+
+fn is_sub_sentence_start(char: char) -> bool {
+    matches!(
+        char,
+        '(' | '（' | '{' | '〖' | '『' | '｛' | '[' | '「' | '【' | '〔' | '［' | '〚' | '〘'
     )
 }
 

@@ -1,0 +1,10 @@
+---
+source: src/tests.rs
+expression: "&formatted"
+---
+As a matter of fact
+(or, rather as factually as I know or to the extent of my knowledge),
+some people (maybe quite a lot of people, or just a few people,
+depending on who you ask)
+really love over-using parentheses (I might be one of those people,
+oh no what have I done…).

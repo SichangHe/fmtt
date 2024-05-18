@@ -25,12 +25,22 @@ First, I updated the `DATASET_URL` environment variable for the ML container in 
 }
 
 #[test]
+fn parentheses() {
+    init_tracing();
+    let input = r#"
+As a matter of fact (or, rather as factually as I know or to the extent of my knowledge), some people (maybe quite a lot of people, or just a few people, depending on who you ask) really love over-using parentheses (I might be one of those people, oh no what have I done…).
+"#.trim_start();
+    let formatted = format(input, 80).join("");
+    assert_snapshot!(&formatted);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
     let input = r#"
 The department heads will convene at 3 P.M. to engage in a comprehensive discussion regarding the second-quarter budget, and it is imperative that you bring your identification card for seamless access; subsequently, the Information Technology team is scheduled to conduct a software demonstration at 4 P.M., with the esteemed presence of Mr. Chief Executive Officer's beautiful personal assistant.
 
-In preparation for the impending meeting, a thorough review of the key performance indicators and return on investment is requested before the designated time of the meeting (which is set for 5 P.M.), and your prompt RSVP by 12 P.M. is kindly anticipated to ensure optimal coordination for the arrival of the very important persons at 2 P.M.! Furthermore, it is completely acceptable if you find yourself out of the office during this period.
+In preparation for the impending meeting, a thorough review of the key performance indicators and return on investment is requested before the designated time of the meeting (which is set for 5 P.M.), and your prompt RSVP by 12 P.M. is kindly anticipated to ensure optimal (or at least as optimal as possible) coordination for the arrival of the very important persons at 2 P.M.! Furthermore, it is completely acceptable if you find yourself out of the office during this period.
     Simultaneously, the Quality Assurance team is seeking your valuable input in relation to the user interface and user experience; your collaboration is essential before the end of the day. A brief touch-base is suggested before the close of business hours to synchronize efforts and align objectives for maximum efficiency?
 
 Meanwhile, the Research and Development team is deeply immersed in the execution of a project shrouded in secrecy, with the exact estimated time of arrival for the project launch yet to be determined! Additionally, the Human Resources department requires your date of birth for the forthcoming birthday celebration, an event exclusively reserved for individuals of paramount importance, and your immediate response for attendance is highly encouraged. Enjoy the festivities!
@@ -95,6 +105,8 @@ fn lorem() {
 #[test]
 fn split_point_words() {
     use SentencePosition::*;
+    assert_eq!(SubStart, word_sentence_position("(i.e."));
+    assert_eq!(SubStart, word_sentence_position("[1]"));
     assert_eq!(SubEnd, word_sentence_position("and,"));
     assert_eq!(SubEnd, word_sentence_position("Or,"));
     assert_eq!(SubEnd, word_sentence_position("so)"));
