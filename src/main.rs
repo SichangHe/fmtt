@@ -94,8 +94,7 @@ struct App {
         short = 'p',
         long,
         default_value = "false",
-        help = r#"
-Allow indented paragraphs.
+        help = r#"Allow indented paragraphs.
 If not set, any change indentation changes start a new paragraph."#
     )]
     allow_indented_paragraphs: bool,
@@ -104,8 +103,7 @@ If not set, any change indentation changes start a new paragraph."#
         short,
         long,
         default_value = "false",
-        help = r#"
-Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
+        help = r#"Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
 treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
 Useful for Markdown, especially with `-p`."#
     )]
@@ -115,8 +113,7 @@ Useful for Markdown, especially with `-p`."#
         short,
         long,
         default_value = "false",
-        help = r#"
-Ignore `%`-started lines;
+        help = r#"Ignore `%`-started lines;
 treat `\` started lines as paragraph starts.
 Useful for LaTeX."#
     )]

@@ -218,6 +218,31 @@ content
     assert_snapshot!(&formatted);
 }
 
+#[test]
+fn markdown_mix() {
+    init_tracing();
+    let input = r#"
+# Header 1
+body
+---
+more body
+## Header 2
+content
+- Lists are respected.
+- These two are not merged into one line.
+
+1. Ordered lists are also preserved.
+2. This line is separate from the previous one.
+===
+###### Header 6
+####### This is just ordinary text,
+    not a header.
+"#
+    .trim_start();
+    let formatted = markdown_format(input);
+    assert_snapshot!(&formatted);
+}
+
 fn latex_format(text: &str) -> String {
     format(text, 80, false, &latex_paragraph_starts()).join("")
 }

@@ -51,18 +51,15 @@ Options:
           If input file is provided, write output to it.
 
   -p, --allow-indented-paragraphs
-          
           Allow indented paragraphs.
           If not set, any change indentation changes start a new paragraph.
 
   -m, --markdown-friendly
-          
-          Treat `#`-started lines as single paragraphs;
-          treat `-`/`*` started lines as paragraph starts.
+          Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
+          treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
           Useful for Markdown, especially with `-p`.
 
   -l, --latex-friendly
-          
           Ignore `%`-started lines;
           treat `\` started lines as paragraph starts.
           Useful for LaTeX.
@@ -74,10 +71,13 @@ Options:
           Print version
 ```
 
-## Example
+## Examples
+
+Plain text:
 
 ```sh
-$ echo "The department heads will convene at 3 P.M. to engage in a comprehensive discussion regarding the second-quarter budget, and it is imperative that you bring your identification card for seamless access; subsequently, the Information Technology team is scheduled to conduct a software demonstration at 4 P.M., with the esteemed presence of Mr. Chief Executive Officer's beautiful personal assistant.
+$ echo "
+The department heads will convene at 3 P.M. to engage in a comprehensive discussion regarding the second-quarter budget, and it is imperative that you bring your identification card for seamless access; subsequently, the Information Technology team is scheduled to conduct a software demonstration at 4 P.M., with the esteemed presence of Mr. Chief Executive Officer's beautiful personal assistant.
 
 In preparation for the impending meeting, a thorough review of the key performance indicators and return on investment is requested before the designated time of the meeting (which is set for 5 P.M.), and your prompt RSVP by 12 P.M. is kindly anticipated to ensure optimal (or at least as optimal as possible) coordination for the arrival of the very important persons at 2 P.M.! Furthermore, it is completely acceptable if you find yourself out of the office during this period.
     Simultaneously, the Quality Assurance team is seeking your valuable input in relation to the user interface and user experience; your collaboration is essential before the end of the day. A brief touch-base is suggested before the close of business hours to synchronize efforts and align objectives for maximum efficiency?
@@ -122,4 +122,66 @@ the forthcoming birthday celebration,
 an event exclusively reserved for individuals of paramount importance,
 and your immediate response for attendance is highly encouraged.
 Enjoy the festivities!
+
+```
+
+Markdown-friendly mode:
+
+```sh
+$ echo "
+# Header 1
+body
+---
+more body
+## Header 2
+content
+- Lists are respected.
+- These two are not merged into one line.
+
+1. Ordered lists are also preserved.
+2. This line is separate from the previous one.
+===
+###### Header 6
+####### This is just ordinary text,
+    not a header.
+" | fmtt -pm
+
+# Header 1
+body
+---
+more body
+## Header 2
+content
+- Lists are respected.
+- These two are not merged into one line.
+
+1. Ordered lists are also preserved.
+2. This line is separate from the previous one.
+===
+###### Header 6
+####### This is just ordinary text, not a header.
+
+```
+
+LaTeX-friendly mode:
+
+```sh
+$ echo "
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/fig-name.pdf}
+    \caption{Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.\texdtbf{lorem ipsum dolor sit amet}}
+    \label{fig:lorem}
+\end{figure}
+" | fmtt
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/fig-name.pdf}
+    \caption{Lorem ipsum dolor sit amet,
+    qui minim labore adipisicing minim sint cillum sint consectetur
+    cupidatat.\texdtbf{lorem ipsum dolor sit amet}}
+    \label{fig:lorem}
+\end{figure}
+
 ```

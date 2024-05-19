@@ -1,0 +1,18 @@
+---
+source: src/tests.rs
+expression: "&formatted"
+---
+# Header 1
+body
+---
+more body
+## Header 2
+content
+- Lists are respected.
+- These two are not merged into one line.
+
+1. Ordered lists are also preserved.
+2. This line is separate from the previous one.
+===
+###### Header 6
+####### This is just ordinary text, not a header.
