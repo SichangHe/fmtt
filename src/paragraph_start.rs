@@ -1,5 +1,6 @@
 use super::*;
 
+/// Regex's for determining special paragraph starts.
 #[derive(Clone, Debug, Default)]
 pub struct ParagraphStarts {
     pub single_line: Option<Regex>,
@@ -34,6 +35,7 @@ impl ParagraphStarts {
         }
     }
 
+    /// Generate using configuration presets.
     pub fn preset(markdown_friendly: bool, latex_friendly: bool) -> Result<Self, regex::Error> {
         let mut single_line = Vec::new();
         let mut multi_line = Vec::new();

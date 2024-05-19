@@ -17,12 +17,12 @@ fn main() -> Result<()> {
         read_all(stdin())?
     };
 
-    let paragraph_stats = app.paragraph_starts()?;
+    let paragraph_starts = app.paragraph_starts()?;
     let formatted = format(
         &input,
         app.line_width,
         app.allow_indented_paragraphs,
-        &paragraph_stats,
+        &paragraph_starts,
     );
 
     if let (true, Some(filename)) = (app.change_in_place, &app.filename) {
