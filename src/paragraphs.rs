@@ -47,43 +47,22 @@ impl<'a> ParagraphsIter<'a> {
         let following_text = &self.text[next_new_line_index..];
         trace!(following_text, next_new_line_index);
 
+        // NB: Side effect blocks can be short-circuited.
         if following_text.is_empty()
             || following_text.starts_with('\n')
             || (!self.allow_indented_paragraphs
                 && first_line_indentation(following_text) != indentation)
-            || match self.next_is_single_paragraph {
-                true if next_new_line_index > 0 => {
-                    trace!(next_is_single_paragraph = self.next_is_single_paragraph);
-                    self.next_is_single_paragraph = false;
-                    true
-                }
-                _ => false,
-            }
-            || match self
-                .paragraph_starts
-                .single_line
-                .as_ref()
-                .map(|re| re.is_match(following_text))
-            {
-                Some(true) => {
-                    trace!("paragraph_starts.single_line matches");
-                    self.next_is_single_paragraph = true;
-                    next_new_line_index != 0
-                }
-                _ => false,
-            }
-            || match self
-                .paragraph_starts
-                .multi_line
-                .as_ref()
-                .map(|re| re.is_match(following_text))
-            {
-                Some(true) => {
-                    trace!("paragraph_starts.multi_line matches");
-                    next_new_line_index != 0
-                }
-                _ => false,
-            }
+            || (self.next_is_single_paragraph && next_new_line_index > 0 && {
+                trace!(next_is_single_paragraph = self.next_is_single_paragraph);
+                self.next_is_single_paragraph = false;
+                true
+            })
+            || (self.paragraph_starts.single_line_matches(following_text) && {
+                self.next_is_single_paragraph = true;
+                next_new_line_index != 0
+            })
+            || (next_new_line_index != 0
+                && self.paragraph_starts.multi_line_matches(following_text))
         {
             let yielded = Paragraph {
                 indentation,

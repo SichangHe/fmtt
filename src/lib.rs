@@ -39,6 +39,20 @@ const MARKDOWN_SINGLE_LINE_STARTS: [&str; 3] = ["#{1,6} ", r"---+[$\n]", r"===+[
 const MARKDOWN_MULTI_LINE_STARTS: [&str; 2] = ["[-*] ", r"\d+\. "];
 
 impl ParagraphStarts {
+    pub fn single_line_matches(&self, text: &str) -> bool {
+        self.single_line.as_ref().map(|re| re.is_match(text)) == Some(true) && {
+            trace!("single_line match");
+            true
+        }
+    }
+
+    pub fn multi_line_matches(&self, text: &str) -> bool {
+        self.multi_line.as_ref().map(|re| re.is_match(text)) == Some(true) && {
+            trace!("multi_line match");
+            true
+        }
+    }
+
     pub fn preset(markdown_friendly: bool, latex_friendly: bool) -> Result<Self, regex::Error> {
         let mut single_line = Vec::new();
         let mut multi_line = Vec::new();
