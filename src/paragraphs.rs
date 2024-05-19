@@ -3,13 +3,22 @@ use super::*;
 pub struct ParagraphsIter<'a> {
     text: &'a str,
     allow_indented_paragraphs: bool,
+    paragraph_starts: &'a ParagraphStarts,
+    next_is_single_paragraph: bool,
 }
 
 impl<'a> ParagraphsIter<'a> {
-    pub fn new(text: &'a str, allow_indented_paragraphs: bool) -> Self {
+    pub fn new(
+        text: &'a str,
+        allow_indented_paragraphs: bool,
+        paragraph_starts: &'a ParagraphStarts,
+    ) -> Self {
+        trace!(allow_indented_paragraphs, ?paragraph_starts);
         Self {
             text,
             allow_indented_paragraphs,
+            paragraph_starts,
+            next_is_single_paragraph: false,
         }
     }
 
@@ -37,10 +46,44 @@ impl<'a> ParagraphsIter<'a> {
     ) -> Option<Paragraph<'a>> {
         let following_text = &self.text[next_new_line_index..];
         trace!(following_text, next_new_line_index);
+
         if following_text.is_empty()
             || following_text.starts_with('\n')
             || (!self.allow_indented_paragraphs
                 && first_line_indentation(following_text) != indentation)
+            || match self.next_is_single_paragraph {
+                true if next_new_line_index > 0 => {
+                    trace!(next_is_single_paragraph = self.next_is_single_paragraph);
+                    self.next_is_single_paragraph = false;
+                    true
+                }
+                _ => false,
+            }
+            || match self
+                .paragraph_starts
+                .single_line
+                .as_ref()
+                .map(|re| re.is_match(following_text))
+            {
+                Some(true) => {
+                    trace!("paragraph_starts.single_line matches");
+                    self.next_is_single_paragraph = true;
+                    next_new_line_index != 0
+                }
+                _ => false,
+            }
+            || match self
+                .paragraph_starts
+                .multi_line
+                .as_ref()
+                .map(|re| re.is_match(following_text))
+            {
+                Some(true) => {
+                    trace!("paragraph_starts.multi_line matches");
+                    next_new_line_index != 0
+                }
+                _ => false,
+            }
         {
             let yielded = Paragraph {
                 indentation,

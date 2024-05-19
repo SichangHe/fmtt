@@ -1,6 +1,6 @@
 use std::{fs::File, io::*, path::PathBuf};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Parser;
 use fmtt::*;
 use tracing_subscriber::EnvFilter;
@@ -17,7 +17,13 @@ fn main() -> Result<()> {
         read_all(stdin())?
     };
 
-    let formatted = format(&input, app.line_width, app.allow_indented_paragraphs);
+    let paragraph_stats = app.paragraph_starts()?;
+    let formatted = format(
+        &input,
+        app.line_width,
+        app.allow_indented_paragraphs,
+        &paragraph_stats,
+    );
 
     if let (true, Some(filename)) = (app.change_in_place, &app.filename) {
         write_all(File::create(filename)?, &formatted)?;
@@ -94,14 +100,13 @@ If not set, any change indentation changes start a new paragraph."#
     )]
     allow_indented_paragraphs: bool,
 
-    // TODO: Implement.
     #[arg(
         short,
         long,
         default_value = "false",
         help = r#"
-Treat `#`-started lines as single paragraphs;
-treat `-`/`*` started lines as paragraph starts.
+Treat `# `/`## `/…/`###### `-started lines as single paragraphs;
+treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
 Useful for Markdown, especially with `-p`."#
     )]
     markdown_friendly: bool,
@@ -117,4 +122,11 @@ treat `\` started lines as paragraph starts.
 Useful for LaTeX."#
     )]
     latex_friendly: bool,
+}
+
+impl App {
+    fn paragraph_starts(&self) -> Result<ParagraphStarts> {
+        ParagraphStarts::preset(self.markdown_friendly, self.latex_friendly)
+            .context("Failed to build special paragraph starts handler.")
+    }
 }

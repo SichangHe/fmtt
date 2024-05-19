@@ -5,7 +5,7 @@ use tracing_subscriber::EnvFilter;
 use super::*;
 
 fn default_format(text: &str) -> String {
-    format(text, 80, false).join("")
+    format(text, 80, false, &Default::default()).join("")
 }
 
 #[test]
@@ -128,7 +128,7 @@ consequat.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
-    let formatted = format(input, 80, true).join("");
+    let formatted = format(input, 80, true, &Default::default()).join("");
     assert_snapshot!(&formatted);
 }
 
@@ -137,6 +137,83 @@ fn lorem() {
     init_tracing();
     let input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n";
     let formatted = default_format(input);
+    assert_snapshot!(&formatted);
+}
+
+fn markdown_format(text: &str) -> String {
+    format(text, 80, true, &markdown_paragraph_starts()).join("")
+}
+
+fn markdown_paragraph_starts() -> ParagraphStarts {
+    ParagraphStarts::preset(true, false).expect("Preset regex is incorrect.")
+}
+
+#[test]
+fn markdown_regex() {
+    let ParagraphStarts {
+        single_line: Some(single_line),
+        multi_line: Some(multi_line),
+    } = markdown_paragraph_starts()
+    else {
+        panic!("Should have regex.")
+    };
+
+    assert!(single_line.is_match("# Header\nblah"));
+    assert!(single_line.is_match("###### Header\nblah"));
+    assert!(!single_line.is_match("####### body\nblah"));
+    assert!(single_line.is_match("---\nblah"));
+    assert!(single_line.is_match("===\nblah"));
+    assert!(single_line.is_match("----\nblah"));
+
+    assert!(multi_line.is_match("- lorem\nblah"));
+    assert!(multi_line.is_match("* lorem\nblah"));
+    assert!(multi_line.is_match("1. lorem\nblah"));
+}
+
+#[test]
+fn markdown_ordered_list() {
+    init_tracing();
+    let input = r#"
+1. Lorem ipsum dolor sit amet
+2. consectetur adipiscing elit
+3. Sed do eiusmod tempor incididunt ut labore et
+    dolore magna aliqua
+"#
+    .trim_start();
+    let formatted = markdown_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
+fn markdown_unordered_list() {
+    init_tracing();
+    let input = r#"
+- Lorem ipsum dolor sit amet
+- consectetur adipiscing elit
+* Sed do eiusmod tempor incididunt ut labore et
+    dolore magna aliqua
+"#
+    .trim_start();
+    let formatted = markdown_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
+fn markdown_headers_separators() {
+    init_tracing();
+    let input = r#"
+# Header 1
+body
+---
+## Header 2
+content
+===
+###### Header 6
+####### This is just ordinary text,
+    not a header.
+"#
+    .trim_start();
+    let formatted = markdown_format(input);
     assert_snapshot!(&formatted);
 }
 
