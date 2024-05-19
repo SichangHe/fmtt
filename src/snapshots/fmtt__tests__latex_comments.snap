@@ -1,0 +1,15 @@
+---
+source: src/tests.rs
+expression: "&formatted"
+---
+%Future work: Replace with real text. "Lorem ipsum dolor sit amet, consectetur adipiscing elit." is meaningless for most people.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. % Comment in the middle are not dealt with.
+% But, comment starting a line should be ignored, regardless of its length (it will be in one line).
+Duis aute irure dolor in reprehenderit in
+voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident,
+sunt in culpa qui officia deserunt mollit anim id est laborum.

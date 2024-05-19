@@ -5,6 +5,7 @@ pub struct ParagraphsIter<'a> {
     allow_indented_paragraphs: bool,
     paragraph_starts: &'a ParagraphStarts,
     next_is_single_paragraph: bool,
+    next_is_ignore_paragraph: bool,
 }
 
 impl<'a> ParagraphsIter<'a> {
@@ -19,6 +20,7 @@ impl<'a> ParagraphsIter<'a> {
             allow_indented_paragraphs,
             paragraph_starts,
             next_is_single_paragraph: false,
+            next_is_ignore_paragraph: false,
         }
     }
 
@@ -46,12 +48,22 @@ impl<'a> ParagraphsIter<'a> {
     ) -> Option<Paragraph<'a>> {
         let following_text = &self.text[next_new_line_index..];
         trace!(following_text, next_new_line_index);
+        let mut ignore = false;
 
         // NB: Side effect blocks can be short-circuited.
         if following_text.is_empty()
             || following_text.starts_with('\n')
             || (!self.allow_indented_paragraphs
                 && first_line_indentation(following_text) != indentation)
+            || (self.next_is_ignore_paragraph && next_new_line_index > 0 && {
+                ignore = true;
+                self.next_is_ignore_paragraph = false;
+                true
+            })
+            || (self.paragraph_starts.ignore_line_matches(following_text) && {
+                self.next_is_ignore_paragraph = true;
+                next_new_line_index != 0
+            })
             || (self.next_is_single_paragraph && next_new_line_index > 0 && {
                 trace!(next_is_single_paragraph = self.next_is_single_paragraph);
                 self.next_is_single_paragraph = false;
@@ -65,6 +77,7 @@ impl<'a> ParagraphsIter<'a> {
                 && self.paragraph_starts.multi_line_matches(following_text))
         {
             let yielded = Paragraph {
+                ignore,
                 indentation,
                 words: &self.text[..next_new_line_index],
             };
@@ -109,6 +122,7 @@ pub fn first_line_indentation(line: &str) -> usize {
 
 #[derive(Clone, Debug)]
 pub struct Paragraph<'a> {
+    pub ignore: bool,
     pub indentation: usize,
     pub words: &'a str,
 }
@@ -118,7 +132,9 @@ const SPACES: &str =
 
 impl<'a> Paragraph<'a> {
     pub fn format(&self, line_width: usize) -> Vec<&'a str> {
-        if self.words.is_empty() {
+        if self.ignore {
+            return vec![self.words];
+        } else if self.words.is_empty() {
             return vec!["\n"];
         }
 

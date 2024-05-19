@@ -105,13 +105,12 @@ If not set, any change indentation changes start a new paragraph."#
         long,
         default_value = "false",
         help = r#"
-Treat `# `/`## `/…/`###### `-started lines as single paragraphs;
+Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
 treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
 Useful for Markdown, especially with `-p`."#
     )]
     markdown_friendly: bool,
 
-    // TODO: Implement.
     #[arg(
         short,
         long,

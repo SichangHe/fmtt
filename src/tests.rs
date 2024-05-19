@@ -153,6 +153,7 @@ fn markdown_regex() {
     let ParagraphStarts {
         single_line: Some(single_line),
         multi_line: Some(multi_line),
+        ignore_line: _,
     } = markdown_paragraph_starts()
     else {
         panic!("Should have regex.")
@@ -214,6 +215,60 @@ content
 "#
     .trim_start();
     let formatted = markdown_format(input);
+    assert_snapshot!(&formatted);
+}
+
+fn latex_format(text: &str) -> String {
+    format(text, 80, false, &latex_paragraph_starts()).join("")
+}
+
+fn latex_paragraph_starts() -> ParagraphStarts {
+    ParagraphStarts::preset(false, true).expect("Preset regex is incorrect.")
+}
+
+#[test]
+fn latex_regex() {
+    let ParagraphStarts {
+        single_line: _,
+        multi_line: Some(multi_line),
+        ignore_line: Some(ignore_line),
+    } = latex_paragraph_starts()
+    else {
+        panic!("Should have regex.")
+    };
+
+    assert!(multi_line.is_match("\\Rightarrow x^2\n\\"));
+    assert!(multi_line.is_match("\\input{intro}"));
+
+    assert!(ignore_line.is_match("%blah\nblah"));
+    assert!(ignore_line.is_match("% blah"));
+}
+
+#[test]
+fn latex_figure() {
+    init_tracing();
+    let input = r#"
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/fig-name.pdf}
+    \caption{Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.\texdtbf{lorem ipsum dolor sit amet}}
+    \label{fig:lorem}
+\end{figure}
+"#.trim_start();
+    let formatted = latex_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
+fn latex_comments() {
+    init_tracing();
+    let input = r#"
+%Future work: Replace with real text. "Lorem ipsum dolor sit amet, consectetur adipiscing elit." is meaningless for most people.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. % Comment in the middle are not dealt with.
+% But, comment starting a line should be ignored, regardless of its length (it will be in one line).
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+"#.trim_start();
+    let formatted = latex_format(input);
     assert_snapshot!(&formatted);
 }
 
