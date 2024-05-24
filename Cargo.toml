@@ -8,9 +8,16 @@ repository = "https://github.com/SichangHe/fmtt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "fmtt"
+crate-type = ["cdylib", "lib"]
+
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+pyo3 = { version = "0.21", features = [
+    "experimental-declarative-modules",
+], optional = true }
 regex = "1"
 tracing = { version = "0.1", default_features = false }
 tracing-subscriber = { version = "0.3", default_features = false, features = [
@@ -21,6 +28,10 @@ tracing-subscriber = { version = "0.3", default_features = false, features = [
 
 [dev-dependencies]
 insta = "1.39"
+
+[features]
+default = []
+py = ["dep:pyo3"]
 
 [profile.release]
 opt-level = "s"

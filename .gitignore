@@ -1,13 +1,64 @@
+# Archive
+**.7z
+**.bz2
+**.gz
+**.gzip
+**.jar
+**.lz4
+**.lzma
+**.pak
+**.rar
+**.tar
+**.tbz2
+**.tgz
+**.tlz
+**.txz
+**.xz
+**.zip
+**.zst
+
 # Artifacts
+**.buildlog/
+**.class
 **.dart_tool/
 **.flutter*
-**.ipynb_checkpoints/
+**.flutter-plugins
+**.flutter-plugins-dependencies
+**.history
+**.iml
+**.ipr
+**.iws
+**.lock
+**.o
+**.pub-cache/
+**.pub/
 **.pyc
-**__pycache__/
-**build/
+**.so
+**/.dSYM/
+**/.dart_tool/
+**/.idea/
+**/.ipynb_checkpoints/
+**/__pycache__/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/app.*.map.json
+**/app.*.symbols
+**/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/migrate_working_dir/
+**/node_modules/
+**/package-lock.json
+**/target/
+**/venv/
+
+# Audio
+**.wav
 
 # Auxiliary files
 **.bak
+**.swp
 **.tmp
 
 # Databases
@@ -17,6 +68,7 @@
 # Documents
 **.csv
 **.doc*
+**.html
 **.pdf
 **.ppt*
 **.txt
@@ -72,20 +124,20 @@
 **.dvi
 **.fdb_latexmk
 **.fls
-**.gz
 **.lof
 **.log
 **.lot
 **.out
 **.pdf
+**.run.xml
 **.synctex.gz
 **.toc
 **.xcp
 **.xdv
-**.xml
 **blx.bib
 **comment.cut
 
-# Specific
-**.lock
-/target
+# Video
+**.mkv
+**.mov
+**.mp4
