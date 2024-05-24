@@ -38,61 +38,6 @@ impl<'a> ParagraphsIter<'a> {
             }
         }
     }
-
-    // TODO: Free tail recursion.
-    #[inline(always)]
-    fn inner_next(
-        &mut self,
-        indentation: usize,
-        next_new_line_index: usize,
-    ) -> Option<Paragraph<'a>> {
-        let following_text = &self.text[next_new_line_index..];
-        trace!(following_text, next_new_line_index);
-        let mut ignore = false;
-
-        // NB: Side effect blocks can be short-circuited.
-        if following_text.is_empty()
-            || following_text.starts_with('\n')
-            || (!self.allow_indented_paragraphs
-                && first_line_indentation(following_text) != indentation)
-            || (self.next_is_ignore_paragraph && next_new_line_index > 0 && {
-                ignore = true;
-                self.next_is_ignore_paragraph = false;
-                true
-            })
-            || (self.paragraph_starts.ignore_line_matches(following_text) && {
-                self.next_is_ignore_paragraph = true;
-                next_new_line_index != 0
-            })
-            || (self.next_is_single_paragraph && next_new_line_index > 0 && {
-                trace!(next_is_single_paragraph = self.next_is_single_paragraph);
-                self.next_is_single_paragraph = false;
-                true
-            })
-            || (self.paragraph_starts.single_line_matches(following_text) && {
-                self.next_is_single_paragraph = true;
-                next_new_line_index != 0
-            })
-            || (next_new_line_index != 0
-                && self.paragraph_starts.multi_line_matches(following_text))
-        {
-            let yielded = Paragraph {
-                ignore,
-                indentation,
-                words: &self.text[..next_new_line_index],
-            };
-            self.text = match next_new_line_index {
-                0 => &self.text[1..], // Yielded an empty paragraph.
-                _ => following_text,
-            };
-            return Some(yielded);
-        }
-
-        let line_break_index = following_text
-            .find('\n')
-            .unwrap_or(following_text.len() - 1);
-        self.inner_next(indentation, next_new_line_index + line_break_index + 1)
-    }
 }
 
 impl<'a> Iterator for ParagraphsIter<'a> {
@@ -104,8 +49,67 @@ impl<'a> Iterator for ParagraphsIter<'a> {
         }
         self.trim_extra_start_line_breaks();
         let indentation = first_line_indentation(self.text);
-        self.inner_next(indentation, 0)
+        iter_inner_next(self, indentation, 0)
     }
+}
+
+// This has to be a static function for `tailcall`.
+#[inline(always)]
+#[tailcall]
+fn iter_inner_next<'a>(
+    iter: &mut ParagraphsIter<'a>,
+    indentation: usize,
+    next_new_line_index: usize,
+) -> Option<Paragraph<'a>> {
+    let following_text = &iter.text[next_new_line_index..];
+    trace!(following_text, next_new_line_index);
+    let mut ignore = false;
+
+    // NB: Side effect blocks can be short-circuited.
+    if following_text.is_empty()
+        || following_text.starts_with('\n')
+        || (!iter.allow_indented_paragraphs
+            && first_line_indentation(following_text) != indentation)
+        || (iter.next_is_ignore_paragraph && next_new_line_index > 0 && {
+            ignore = true;
+            iter.next_is_ignore_paragraph = false;
+            true
+        })
+        || (iter.paragraph_starts.ignore_line_matches(following_text) && {
+            iter.next_is_ignore_paragraph = true;
+            next_new_line_index != 0
+        })
+        || (iter.next_is_single_paragraph && next_new_line_index > 0 && {
+            trace!(next_is_single_paragraph = iter.next_is_single_paragraph);
+            iter.next_is_single_paragraph = false;
+            true
+        })
+        || (iter.paragraph_starts.single_line_matches(following_text) && {
+            iter.next_is_single_paragraph = true;
+            next_new_line_index != 0
+        })
+        || (next_new_line_index != 0 && iter.paragraph_starts.multi_line_matches(following_text))
+    {
+        let yielded = Paragraph {
+            ignore,
+            indentation,
+            words: &iter.text[..next_new_line_index],
+        };
+        iter.text = match next_new_line_index {
+            0 => &iter.text[1..], // Yielded an empty paragraph.
+            _ => following_text,
+        };
+        return Some(yielded);
+    }
+
+    let line_break_index = following_text
+        .find('\n')
+        .unwrap_or(following_text.len() - 1);
+    iter_inner_next(
+        iter,
+        indentation,
+        next_new_line_index + line_break_index + 1,
+    )
 }
 
 pub fn first_line_indentation(line: &str) -> usize {

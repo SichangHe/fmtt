@@ -19,6 +19,7 @@ pyo3 = { version = "0.21", features = [
     "experimental-declarative-modules",
 ], optional = true }
 regex = "1"
+tailcall = "1.0.1"
 tracing = { version = "0.1", default_features = false }
 tracing-subscriber = { version = "0.3", default_features = false, features = [
     "env-filter",

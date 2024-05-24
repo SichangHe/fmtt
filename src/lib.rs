@@ -1,6 +1,7 @@
 use std::str::Chars;
 
 use regex::Regex;
+use tailcall::tailcall;
 use tracing::{debug, trace};
 
 pub mod paragraph_start;
