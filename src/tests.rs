@@ -53,6 +53,14 @@ Blah blah blah.
 }
 
 #[test]
+fn long_link() {
+    init_tracing();
+    let input = "[![YouTube icon](https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg) Channel](https://www.youtube.com/@sichanghe)";
+    let formatted = default_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
     let input = r#"

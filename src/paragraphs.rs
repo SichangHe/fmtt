@@ -185,10 +185,13 @@ impl<'a> Paragraph<'a> {
                 }
                 match split_points.next() {
                     None => {
+                        // No valid split point found.
+                        // Drain the entire buffer once.
                         let last_index = to_be_split.len().saturating_sub(1);
                         push_line!(to_be_split.drain(..last_index));
                         split_points.reset();
                         n_char = split_len;
+                        break;
                     }
                     Some(
                         split_point @ SplitPoint {
