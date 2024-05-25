@@ -4,10 +4,6 @@ use super::*;
 /// Handles abbreviations using heuristics.
 pub fn word_sentence_position(word: &str) -> SentencePosition {
     use SentencePosition::*;
-    match word.chars().next() {
-        Some(first_char) if is_sub_sentence_start(first_char) => return SubStart,
-        _ => {}
-    };
     let mut chars = word.chars();
     match chars.next_back() {
         Some('.') if is_abbreviation(&mut chars) => {}
@@ -15,6 +11,10 @@ pub fn word_sentence_position(word: &str) -> SentencePosition {
         Some(last_char) if is_sub_sentence_separator(last_char) => return SubEnd,
         _ => {}
     }
+    match word.chars().next() {
+        Some(first_char) if is_sub_sentence_start(first_char) => return SubStart,
+        _ => {}
+    };
     match is_connection_word(word) {
         true => ConnectionWord,
         false => Other,

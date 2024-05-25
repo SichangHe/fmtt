@@ -69,6 +69,14 @@ fn long_link_long_description() {
 }
 
 #[test]
+fn many_commas() {
+    init_tracing();
+    let input = r"For a color with linear red, green, blue values $r,g,b\in[0,1]$, hue $h\in[0,360)$, saturation $s\in[0,1]$, lightness $l\in[0,1]$, and grayscale $p\in[0,1]$:";
+    let formatted = default_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
     let input = r#"
@@ -316,10 +324,11 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 #[test]
 fn split_point_words() {
     use SentencePosition::*;
-    assert_eq!(SubStart, word_sentence_position("(i.e."));
-    assert_eq!(SubStart, word_sentence_position("[1]"));
+    assert_eq!(SubStart, word_sentence_position("(though"));
+    assert_eq!(SubStart, word_sentence_position("[1"));
     assert_eq!(SubEnd, word_sentence_position("and,"));
     assert_eq!(SubEnd, word_sentence_position("Or,"));
+    assert_eq!(SubEnd, word_sentence_position("[1]"));
     assert_eq!(SubEnd, word_sentence_position("so)"));
     assert_eq!(End, word_sentence_position("A..Z."));
     assert_eq!(End, word_sentence_position("Black)."));
@@ -327,6 +336,7 @@ fn split_point_words() {
     assert_eq!(End, word_sentence_position("A.n."));
     assert_eq!(End, word_sentence_position("Program."));
     assert_eq!(End, word_sentence_position("HMM."));
+    assert_eq!(End, word_sentence_position("(i.e."));
     assert_eq!(Other, word_sentence_position("Mr."));
     assert_eq!(Other, word_sentence_position("Ph.D."));
     assert_eq!(Other, word_sentence_position("A.K.A."));
