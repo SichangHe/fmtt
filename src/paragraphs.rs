@@ -55,6 +55,7 @@ impl<'a> Iterator for ParagraphsIter<'a> {
 
 // This has to be a static function for `tailcall`.
 #[inline(always)]
+#[allow(unreachable_code)]
 #[tailcall]
 fn iter_inner_next<'a>(
     iter: &mut ParagraphsIter<'a>,
