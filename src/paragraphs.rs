@@ -183,9 +183,10 @@ impl<'a> Paragraph<'a> {
                 if n_char <= line_width || to_be_split.is_empty() {
                     break;
                 }
-                match split_points.next() {
-                    None => {
-                        // No valid split point found.
+                match (split_len >= line_width, split_points.next()) {
+                    (true, _) | (_, None) => {
+                        // Either the new split is too longer,
+                        // or no valid split point was found.
                         // Drain the entire buffer once.
                         let last_index = to_be_split.len().saturating_sub(1);
                         push_line!(to_be_split.drain(..last_index));
@@ -193,11 +194,14 @@ impl<'a> Paragraph<'a> {
                         n_char = split_len;
                         break;
                     }
-                    Some(
-                        split_point @ SplitPoint {
-                            index,
-                            n_char_after,
-                        },
+                    (
+                        _,
+                        Some(
+                            split_point @ SplitPoint {
+                                index,
+                                n_char_after,
+                            },
+                        ),
                     ) => {
                         trace!(?split_point, "next");
                         push_line!(to_be_split.drain(..index));

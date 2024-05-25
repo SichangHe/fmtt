@@ -61,6 +61,14 @@ fn long_link() {
 }
 
 #[test]
+fn long_link_long_description() {
+    init_tracing();
+    let input = "![Math for hue-grayscale to RGB conversion on a whiteboard](https://github.com/SichangHe/internet_route_verification/assets/84777573/11f8ad38-403c-4e5d-99da-66176795223f)";
+    let formatted = default_format(input);
+    assert_snapshot!(&formatted);
+}
+
+#[test]
 fn gpt1() {
     init_tracing();
     let input = r#"
