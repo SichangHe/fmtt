@@ -1,3 +1,5 @@
+use std::str::SplitWhitespace;
+
 use super::*;
 
 pub struct ParagraphsIter<'a> {
@@ -142,79 +144,92 @@ impl<'a> Paragraph<'a> {
         } else if self.words.is_empty() {
             return vec!["\n"];
         }
+        paragraph_inner_format(
+            self.indentation,
+            line_width + 1 - self.indentation,
+            Vec::with_capacity(self.words.len() / 32),
+            SplitPoints::default(),
+            Vec::with_capacity(line_width / 2),
+            0,
+            self.words.split_whitespace(),
+        )
+    }
+}
 
-        let mut result = Vec::with_capacity(self.words.len() / 32);
+#[inline(always)]
+#[allow(unreachable_code)]
+#[tailcall]
+fn paragraph_inner_format<'a>(
+    indentation: usize,
+    available_line_width: usize,
+    mut result: Vec<&'a str>,
+    mut split_points: SplitPoints,
+    mut to_be_split: Vec<&'a str>,
+    mut n_char: usize,
+    mut splits: SplitWhitespace<'a>,
+) -> Vec<&'a str> {
+    macro_rules! push_line {
+        ($pushed_words:expr) => {
+            result.push(&SPACES[..indentation]);
+            for word in $pushed_words {
+                result.push(word);
+                result.push(" ");
+            }
+            result.pop();
 
-        self.inner_format(line_width, &mut result);
-
-        result
+            debug!("Last word in line: {:?}.", result.last());
+            result.push("\n");
+        };
     }
 
-    #[inline(always)]
-    fn inner_format(&self, line_width: usize, result: &mut Vec<&'a str>) {
-        let line_width = line_width + 1 - self.indentation;
-
-        let mut split_points = SplitPoints::default();
-        let mut to_be_split = Vec::with_capacity(line_width / 2);
-        let mut n_char = 0;
-
-        macro_rules! push_line {
-            ($pushed_words:expr) => {
-                result.push(&SPACES[..self.indentation]);
-                for word in $pushed_words {
-                    result.push(word);
-                    result.push(" ");
-                }
-                result.pop();
-
-                debug!("Last word in line: {:?}.", result.last());
-                result.push("\n");
-            };
-        }
-
-        for split in self.words.split_whitespace() {
-            let split_len = split.chars().count() + 1;
-
-            to_be_split.push(split);
-            n_char += split_len;
-            trace!(split, n_char, ?split_points, ?to_be_split);
-
-            for _try in 0usize..2 {
-                if n_char <= line_width || to_be_split.is_empty() {
-                    break;
-                }
-                match (split_len >= line_width, split_points.next()) {
-                    (true, _) | (_, None) => {
-                        // Either the new split is too longer,
-                        // or no valid split point was found.
-                        // Drain the entire buffer once.
-                        let last_index = to_be_split.len().saturating_sub(1);
-                        push_line!(to_be_split.drain(..last_index));
-                        split_points.reset();
-                        n_char = split_len;
-                        break;
-                    }
-                    (
-                        _,
-                        Some(
-                            split_point @ SplitPoint {
-                                index,
-                                n_char_after,
-                            },
-                        ),
-                    ) => {
-                        trace!(?split_point, "next");
-                        push_line!(to_be_split.drain(..index));
-                        n_char = n_char_after + split_len;
-                    }
-                }
-            }
-
-            split_points.register_split(split, split_len, to_be_split.len());
-        }
-
+    let Some(split) = splits.next() else {
         if !to_be_split.is_empty() {
             push_line!(to_be_split.drain(..));
         }
+        return result;
+    };
+    let split_len = split.chars().count() + 1;
+
+    to_be_split.push(split);
+    n_char += split_len;
+    trace!(split, n_char, ?split_points, ?to_be_split);
+
+    while n_char > available_line_width && !to_be_split.is_empty() {
+        match (split_len >= available_line_width, split_points.next()) {
+            (true, _) | (_, None) => {
+                // Either the new split is too longer,
+                // or no valid split point was found.
+                // Drain the entire buffer once.
+                let last_index = to_be_split.len().saturating_sub(1);
+                push_line!(to_be_split.drain(..last_index));
+                split_points.reset();
+                n_char = split_len;
+                break;
+            }
+            (
+                _,
+                Some(
+                    split_point @ SplitPoint {
+                        index,
+                        n_char_after,
+                    },
+                ),
+            ) => {
+                trace!(?split_point, "next");
+                push_line!(to_be_split.drain(..index));
+                n_char = n_char_after + split_len;
+            }
+        }
     }
+
+    split_points.register_split(split, split_len, to_be_split.len());
+    paragraph_inner_format(
+        indentation,
+        available_line_width,
+        result,
+        split_points,
+        to_be_split,
+        n_char,
+        splits,
+    )
 }
