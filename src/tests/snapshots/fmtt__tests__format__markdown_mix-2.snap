@@ -15,4 +15,5 @@ content
 2. This line is separate from the previous one.
 ===
 ###### Header 6
-####### This is just ordinary text, not a header.
+####### This is just ordinary text,
+    not a header.

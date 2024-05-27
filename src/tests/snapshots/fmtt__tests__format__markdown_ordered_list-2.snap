@@ -4,4 +4,5 @@ expression: "&markdown_formatted"
 ---
 1. Lorem ipsum dolor sit amet
 2. consectetur adipiscing elit
-3. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+3. Sed do eiusmod tempor incididunt ut labore et
+    dolore magna aliqua

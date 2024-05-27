@@ -5,7 +5,7 @@ fn default_format(text: &str) -> String {
 }
 
 fn markdown_format(text: &str) -> String {
-    format(text, 80, Hanging::Flatten, &markdown_paragraph_starts()).join("")
+    format(text, 80, Hanging::Hang, &markdown_paragraph_starts()).join("")
 }
 
 fn latex_format(text: &str) -> String {

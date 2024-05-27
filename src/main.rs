@@ -22,7 +22,7 @@ fn main() -> Result<()> {
     let formatted = format(
         &input,
         app.line_width,
-        app.hanging_config,
+        app.hanging_config(),
         &paragraph_starts,
     );
 
@@ -94,12 +94,14 @@ struct App {
     #[arg(
         short = 'p',
         long,
-        default_value_t,
         value_enum,
-        help = r#"Treatment for hanging paragraphs.
-If not set, any change indentation changes start a new paragraph."#
+        help = r#"Treatment for hanging paragraphs:
+`disallow` causes any indentation changes to start a new paragraph (default);
+`flatten` ignores any indentation changes;
+`hang` allows the second line to start hanging (having more indentation).
+"#
     )]
-    hanging_config: Hanging,
+    hanging_config: Option<Hanging>,
 
     #[arg(
         short,
@@ -126,5 +128,18 @@ impl App {
     fn paragraph_starts(&self) -> Result<ParagraphStarts> {
         ParagraphStarts::preset(self.markdown_friendly, self.latex_friendly)
             .context("Failed to build special paragraph starts handler.")
+    }
+
+    fn hanging_config(&self) -> Hanging {
+        match (
+            self.hanging_config,
+            self.markdown_friendly,
+            self.latex_friendly,
+        ) {
+            (Some(config), _, _) => config,
+            (_, true, _) => Hanging::Hang,
+            (_, _, true) => Hanging::Flatten,
+            _ => Hanging::Disallow,
+        }
     }
 }
