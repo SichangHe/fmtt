@@ -16,12 +16,13 @@ pub struct ParagraphsIter<'a> {
 #[derive(clap::ValueEnum, Copy, Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Hanging {
-    /// Hanging paragraphs are treated as separate paragraphs.
+    /// Disallow hanging. Any indentation change starts a new paragraph.
     #[default]
     Disallow,
-    /// Remove extra indentation in hanging lines.
+    /// Ignore indentation changes; remove extra indentation in hanging lines.
     Flatten,
-    /// Keep the hanging lines as they are.
+    /// Allow the second line to start hanging (having more indentation);
+    /// keep the hanging lines as is.
     Hang,
 }
 

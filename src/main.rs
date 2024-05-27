@@ -95,11 +95,7 @@ struct App {
         short = 'p',
         long,
         value_enum,
-        help = r#"Treatment for hanging paragraphs:
-`disallow` causes any indentation changes to start a new paragraph (default);
-`flatten` ignores any indentation changes;
-`hang` allows the second line to start hanging (having more indentation).
-"#
+        help = r#"Treatment for hanging paragraphs. Default: disallow."#
     )]
     hanging_config: Option<Hanging>,
 
@@ -109,7 +105,7 @@ struct App {
         default_value = "false",
         help = r#"Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
 treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
-Useful for Markdown, especially with `-p`."#
+Setting this flag also causes `--hanging-config` to default to `hang`."#
     )]
     markdown_friendly: bool,
 
@@ -131,14 +127,9 @@ impl App {
     }
 
     fn hanging_config(&self) -> Hanging {
-        match (
-            self.hanging_config,
-            self.markdown_friendly,
-            self.latex_friendly,
-        ) {
-            (Some(config), _, _) => config,
-            (_, true, _) => Hanging::Hang,
-            (_, _, true) => Hanging::Flatten,
+        match (self.hanging_config, self.markdown_friendly) {
+            (Some(config), _) => config,
+            (_, true) => Hanging::Hang,
             _ => Hanging::Disallow,
         }
     }

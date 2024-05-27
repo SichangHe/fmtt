@@ -39,7 +39,7 @@ This help message is formatted using FMTT itself as an example.
 Usage: fmtt [OPTIONS]
 
 Options:
-  -w, --line-width <LINE_WIDTH>
+-w, --line-width <LINE_WIDTH>
           Maximum line width limit.
           
           [default: 80]
@@ -50,14 +50,18 @@ Options:
   -c, --change-in-place
           If input file is provided, write output to it.
 
-  -p, --allow-indented-paragraphs
-          Allow indented paragraphs.
-          If not set, any change indentation changes start a new paragraph.
+  -p, --hanging-config <HANGING_CONFIG>
+          Treatment for hanging paragraphs. Default: disallow.
+
+          Possible values:
+          - disallow: Disallow hanging. Any indentation change starts a new paragraph
+          - flatten:  Ignore indentation changes; remove extra indentation in hanging lines
+          - hang:     Allow the second line to start hanging (having more indentation); keep the hanging lines as is
 
   -m, --markdown-friendly
           Treat `# `/`## `/…/`###### `/`---`/`===`-started lines as single paragraphs;
           treat `- `/`* `/regex`\d+\. `-started lines as paragraph starts.
-          Useful for Markdown, especially with `-p`.
+          Setting this flag also causes `--hanging-config` to default to `hang`.
 
   -l, --latex-friendly
           Ignore `%`-started lines;
@@ -144,7 +148,7 @@ content
 ###### Header 6
 ####### This is just ordinary text,
     not a header.
-" | fmtt -pm
+" | fmtt -m
 
 # Header 1
 body
@@ -159,7 +163,8 @@ content
 2. This line is separate from the previous one.
 ===
 ###### Header 6
-####### This is just ordinary text, not a header.
+####### This is just ordinary text,
+    not a header.
 
 ```
 
