@@ -183,17 +183,19 @@ impl<'a> Paragraph<'a> {
         } else if self.words.is_empty() {
             return vec!["\n"];
         }
+        let mut result = Vec::with_capacity(self.words.len() / 32);
         paragraph_inner_format(
-            self.config.clone(),
-            line_width + 1 - self.config.indentation,
-            Vec::with_capacity(self.words.len() / 32),
-            SplitPoints::default(),
-            Vec::with_capacity(line_width / 2),
-            0,
-            0,
-            self.words.split_whitespace(),
-            0,
-        )
+            &mut self.config.clone(),
+            &mut (line_width + 1 - self.config.indentation),
+            &mut result,
+            &mut SplitPoints::default(),
+            &mut Vec::with_capacity(line_width / 2),
+            &mut 0,
+            &mut 0,
+            &mut self.words.split_whitespace(),
+            &mut 0,
+        );
+        result
     }
 }
 
@@ -202,48 +204,47 @@ impl<'a> Paragraph<'a> {
 #[allow(unreachable_code, clippy::too_many_arguments)]
 #[tailcall]
 pub fn paragraph_inner_format<'a, I>(
-    mut config: ParagraphConfig,
-    mut available_line_width: usize,
-    mut result: Vec<&'a str>,
-    mut split_points: SplitPoints,
-    mut to_be_split: Vec<&'a str>,
-    mut n_char: usize,
-    mut split_len: usize,
-    mut splits: I,
-    mut drain_index: usize,
-) -> Vec<&'a str>
-where
+    config: &mut ParagraphConfig,
+    available_line_width: &mut usize,
+    result: &mut Vec<&'a str>,
+    split_points: &mut SplitPoints,
+    to_be_split: &mut Vec<&'a str>,
+    n_char: &mut usize,
+    split_len: &mut usize,
+    splits: &mut I,
+    drain_index: &mut usize,
+) where
     I: Iterator<Item = &'a str>,
 {
     trace!(n_char, split_len, drain_index, ?split_points, ?to_be_split);
 
-    if drain_index > 0 {
+    if *drain_index > 0 {
         result.push(&SPACES[..config.indentation]);
-        for word in to_be_split.drain(..drain_index) {
+        for word in to_be_split.drain(..*drain_index) {
             result.push(word);
             result.push(" ");
         }
         debug!("Last word in line: {:?}.", result.last());
         *result.last_mut().expect("We just pushed") = "\n";
-        drain_index = 0;
+        *drain_index = 0;
         // Handle hanging:
         if let Some(hanging_indentation) = config.hanging_indentation.take() {
-            available_line_width -= hanging_indentation - config.indentation;
+            *available_line_width -= hanging_indentation - config.indentation;
             config.indentation = hanging_indentation;
         }
     } else if n_char < available_line_width || to_be_split.len() <= 1 {
         if let Some(&split) = to_be_split.last() {
-            split_points.register_split(split, split_len, to_be_split.len());
+            split_points.register_split(split, *split_len, to_be_split.len());
         }
         if let Some(split) = splits.next() {
-            split_len = split.chars().count() + 1;
+            *split_len = split.chars().count() + 1;
             to_be_split.push(split);
-            n_char += split_len;
+            *n_char += *split_len;
         } else {
             if to_be_split.is_empty() {
-                return result;
+                return;
             }
-            drain_index = to_be_split.len();
+            *drain_index = to_be_split.len();
         };
     } else {
         match (split_len >= available_line_width, split_points.next()) {
@@ -251,9 +252,9 @@ where
                 // Either the new split is too longer,
                 // or no valid split point was found.
                 // Drain the entire buffer once.
-                drain_index = to_be_split.len().saturating_sub(1);
+                *drain_index = to_be_split.len().saturating_sub(1);
                 split_points.reset();
-                n_char = split_len;
+                *n_char = *split_len;
             }
             (
                 _,
@@ -262,8 +263,8 @@ where
                     n_char_after,
                 }),
             ) => {
-                drain_index = index;
-                n_char = n_char_after + split_len;
+                *drain_index = index;
+                *n_char = n_char_after + *split_len;
             }
         }
     }
