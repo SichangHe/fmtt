@@ -1,0 +1,7 @@
+---
+source: src/tests/format.rs
+expression: "&markdown_formatted"
+---
+Blah.
+
+Blah blah blah.

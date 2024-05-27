@@ -1,6 +1,0 @@
----
-source: src/tests.rs
-expression: "&formatted"
----
-![Math for hue-grayscale to RGB conversion on a
-whiteboard](https://github.com/SichangHe/internet_route_verification/assets/84777573/11f8ad38-403c-4e5d-99da-66176795223f)

@@ -1,0 +1,7 @@
+---
+source: src/tests/format.rs
+expression: "&default_formatted"
+---
+# Header 1 body --- ## Header 2 content === ###### Header 6
+####### This is just ordinary text,
+    not a header.

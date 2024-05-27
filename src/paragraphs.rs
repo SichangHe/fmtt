@@ -121,10 +121,13 @@ fn iter_inner_next<'a>(
         })
         || (next_new_line_index != 0 && iter.paragraph_starts.multi_line_matches(following_text))
     {
-        let yielded = Paragraph {
+        let config = ParagraphConfig {
             ignore,
             indentation,
             hanging_indentation,
+        };
+        let yielded = Paragraph {
+            config,
             words: &iter.text[..next_new_line_index],
         };
         iter.text = match next_new_line_index {
@@ -158,10 +161,15 @@ pub fn first_line_indentation(line: &str) -> usize {
 
 #[derive(Clone, Debug)]
 pub struct Paragraph<'a> {
+    pub config: ParagraphConfig,
+    pub words: &'a str,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct ParagraphConfig {
     pub ignore: bool,
     pub indentation: usize,
     pub hanging_indentation: Option<usize>,
-    pub words: &'a str,
 }
 
 const SPACES: &str =
@@ -169,14 +177,14 @@ const SPACES: &str =
 
 impl<'a> Paragraph<'a> {
     pub fn format(&self, line_width: usize) -> Vec<&'a str> {
-        if self.ignore {
+        if self.config.ignore {
             return vec![self.words];
         } else if self.words.is_empty() {
             return vec!["\n"];
         }
         paragraph_inner_format(
-            self.indentation,
-            line_width + 1 - self.indentation,
+            self.config.clone(),
+            line_width + 1 - self.config.indentation,
             Vec::with_capacity(self.words.len() / 32),
             SplitPoints::default(),
             Vec::with_capacity(line_width / 2),
@@ -193,8 +201,8 @@ impl<'a> Paragraph<'a> {
 #[allow(unreachable_code, clippy::too_many_arguments)]
 #[tailcall]
 pub fn paragraph_inner_format<'a, I>(
-    indentation: usize,
-    available_line_width: usize,
+    mut config: ParagraphConfig,
+    mut available_line_width: usize,
     mut result: Vec<&'a str>,
     mut split_points: SplitPoints,
     mut to_be_split: Vec<&'a str>,
@@ -209,7 +217,7 @@ where
     trace!(n_char, split_len, drain_index, ?split_points, ?to_be_split);
 
     if drain_index > 0 {
-        result.push(&SPACES[..indentation]);
+        result.push(&SPACES[..config.indentation]);
         for word in to_be_split.drain(..drain_index) {
             result.push(word);
             result.push(" ");
@@ -217,6 +225,11 @@ where
         debug!("Last word in line: {:?}.", result.last());
         *result.last_mut().expect("We just pushed") = "\n";
         drain_index = 0;
+        // Handle hanging:
+        if let Some(hanging_indentation) = config.hanging_indentation.take() {
+            available_line_width -= hanging_indentation - config.indentation;
+            config.indentation = hanging_indentation;
+        }
     } else if n_char < available_line_width || to_be_split.len() <= 1 {
         if let Some(&split) = to_be_split.last() {
             split_points.register_split(split, split_len, to_be_split.len());
@@ -255,7 +268,7 @@ where
     }
 
     paragraph_inner_format(
-        indentation,
+        config,
         available_line_width,
         result,
         split_points,
