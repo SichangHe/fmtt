@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0](https://github.com/SichangHe/fmtt/compare/v0.5.2...v0.6.0) - 2024-05-27
+
+### Other
+- help message align w/ new hanging impl;fix latex config
+- markdown-friendly style preserves hanging
+- formatting consider hanging;macro for snapshot test
+- detect paragraph hanging&3 handling options
+
 ## [0.5.2](https://github.com/SichangHe/fmtt/compare/v0.5.1...v0.5.2) - 2024-05-27
 
 ### Other
