@@ -2,22 +2,39 @@ use super::*;
 
 pub struct ParagraphsIter<'a> {
     text: &'a str,
-    allow_indented_paragraphs: bool,
+    hanging_config: Hanging,
     paragraph_starts: &'a ParagraphStarts,
     next_is_single_paragraph: bool,
     next_is_ignore_paragraph: bool,
 }
 
+/// Options to treat hanging paragraphs such as:
+/// ```markdown
+/// This paragraph has its
+///     second line hanging.
+/// ```
+#[derive(clap::ValueEnum, Copy, Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Hanging {
+    /// Hanging paragraphs are treated as separate paragraphs.
+    #[default]
+    Disallow,
+    /// Remove extra indentation in hanging lines.
+    Flatten,
+    /// Keep the hanging lines as they are.
+    Hang,
+}
+
 impl<'a> ParagraphsIter<'a> {
     pub fn new(
         text: &'a str,
-        allow_indented_paragraphs: bool,
+        hanging_config: Hanging,
         paragraph_starts: &'a ParagraphStarts,
     ) -> Self {
-        trace!(allow_indented_paragraphs, ?paragraph_starts);
+        trace!(?hanging_config, ?paragraph_starts);
         Self {
             text,
-            allow_indented_paragraphs,
+            hanging_config,
             paragraph_starts,
             next_is_single_paragraph: false,
             next_is_ignore_paragraph: false,
@@ -65,12 +82,25 @@ fn iter_inner_next<'a>(
     let following_text = &iter.text[next_new_line_index..];
     trace!(following_text, next_new_line_index);
     let mut ignore = false;
+    let mut hanging_indentation = None;
 
     // NB: Side effect blocks can be short-circuited.
     if following_text.is_empty()
         || following_text.starts_with('\n')
-        || (!iter.allow_indented_paragraphs
-            && first_line_indentation(following_text) != indentation)
+        || match (first_line_indentation(following_text), iter.hanging_config) {
+            (hanging, Hanging::Hang) if hanging > indentation => {
+                match iter.text[..next_new_line_index].rfind('\n') {
+                    // Only the second line can be hanging, but this is not.
+                    Some(_) => true,
+                    None => {
+                        hanging_indentation = Some(hanging);
+                        false
+                    }
+                }
+            }
+            (hanging, Hanging::Disallow | Hanging::Hang) if hanging != indentation => true,
+            _ => false,
+        }
         || (iter.next_is_ignore_paragraph && next_new_line_index > 0 && {
             ignore = true;
             iter.next_is_ignore_paragraph = false;
@@ -94,6 +124,7 @@ fn iter_inner_next<'a>(
         let yielded = Paragraph {
             ignore,
             indentation,
+            hanging_indentation,
             words: &iter.text[..next_new_line_index],
         };
         iter.text = match next_new_line_index {
@@ -129,11 +160,12 @@ pub fn first_line_indentation(line: &str) -> usize {
 pub struct Paragraph<'a> {
     pub ignore: bool,
     pub indentation: usize,
+    pub hanging_indentation: Option<usize>,
     pub words: &'a str,
 }
 
 const SPACES: &str =
-    "                                                                                                                                                                                                                                                                ";
+    "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ";
 
 impl<'a> Paragraph<'a> {
     pub fn format(&self, line_width: usize) -> Vec<&'a str> {

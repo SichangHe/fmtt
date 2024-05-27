@@ -5,7 +5,7 @@ use tracing_subscriber::EnvFilter;
 use super::*;
 
 fn default_format(text: &str) -> String {
-    format(text, 80, false, &Default::default()).join("")
+    format(text, 80, Default::default(), &Default::default()).join("")
 }
 
 #[test]
@@ -152,7 +152,7 @@ consequat.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 "#
     .trim_start();
-    let formatted = format(input, 80, true, &Default::default()).join("");
+    let formatted = format(input, 80, Hanging::Flatten, &Default::default()).join("");
     assert_snapshot!(&formatted);
 }
 
@@ -165,7 +165,7 @@ fn lorem() {
 }
 
 fn markdown_format(text: &str) -> String {
-    format(text, 80, true, &markdown_paragraph_starts()).join("")
+    format(text, 80, Hanging::Flatten, &markdown_paragraph_starts()).join("")
 }
 
 fn markdown_paragraph_starts() -> ParagraphStarts {
@@ -268,7 +268,7 @@ content
 }
 
 fn latex_format(text: &str) -> String {
-    format(text, 80, false, &latex_paragraph_starts()).join("")
+    format(text, 80, Default::default(), &latex_paragraph_starts()).join("")
 }
 
 fn latex_paragraph_starts() -> ParagraphStarts {

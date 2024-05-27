@@ -22,7 +22,7 @@ fn main() -> Result<()> {
     let formatted = format(
         &input,
         app.line_width,
-        app.allow_indented_paragraphs,
+        app.hanging_config,
         &paragraph_starts,
     );
 
@@ -94,11 +94,12 @@ struct App {
     #[arg(
         short = 'p',
         long,
-        default_value = "false",
-        help = r#"Allow indented paragraphs.
+        default_value_t,
+        value_enum,
+        help = r#"Treatment for hanging paragraphs.
 If not set, any change indentation changes start a new paragraph."#
     )]
-    allow_indented_paragraphs: bool,
+    hanging_config: Hanging,
 
     #[arg(
         short,

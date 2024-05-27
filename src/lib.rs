@@ -1,6 +1,7 @@
 use std::str::Chars;
 
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use tailcall::tailcall;
 use tracing::{debug, trace};
 
@@ -9,18 +10,18 @@ pub mod paragraphs;
 pub mod split_points;
 pub mod words;
 
-pub use paragraph_start::ParagraphStarts;
+pub use crate::{paragraph_start::ParagraphStarts, paragraphs::Hanging};
 use {paragraphs::*, split_points::*, words::*};
 
 pub fn format<'a>(
     text: &'a str,
     line_width: usize,
-    allow_indented_paragraphs: bool,
+    hanging_config: Hanging,
     paragraph_starts: &'a ParagraphStarts,
 ) -> Vec<&'a str> {
     let mut result = Vec::with_capacity(text.len() / 32);
 
-    for paragraph in ParagraphsIter::new(text, allow_indented_paragraphs, paragraph_starts) {
+    for paragraph in ParagraphsIter::new(text, hanging_config, paragraph_starts) {
         debug!(?paragraph);
         result.extend(paragraph.format(line_width));
     }
@@ -38,12 +39,14 @@ mod _lowlevel {
     /// Format text diff-friendly by breaking lines of sensible punctuations and
     /// words.
     ///
+    /// - `hanging_config` can be "disallow", "flatten", or "hang".
+    ///
     /// See <https://github.com/SichangHe/fmtt> for the options.
     #[pyfunction]
     #[pyo3(signature = (
         text,
         line_width=80,
-        allow_indented_paragraphs=false,
+        hanging_config="disallow",
         single_line_starts=vec![],
         multi_line_starts=vec![],
         ignore_line_starts=vec![],
@@ -51,23 +54,20 @@ mod _lowlevel {
     fn format(
         text: &str,
         line_width: usize,
-        allow_indented_paragraphs: bool,
+        hanging_config: &str,
         single_line_starts: Vec<String>,
         multi_line_starts: Vec<String>,
         ignore_line_starts: Vec<String>,
     ) -> PyResult<String> {
+        let hanging_config = serde_json::from_str(hanging_config)
+            .map_err(|why| PyValueError::new_err(format!("{why}")))?;
         let paragraph_starts = ParagraphStarts::try_from_str_slices(
             &borrowed_str_slice(&single_line_starts),
             &borrowed_str_slice(&multi_line_starts),
             &borrowed_str_slice(&ignore_line_starts),
         )
         .map_err(|why| PyValueError::new_err(format!("{why}")))?;
-        let formatted_words = super::format(
-            text,
-            line_width,
-            allow_indented_paragraphs,
-            &paragraph_starts,
-        );
+        let formatted_words = super::format(text, line_width, hanging_config, &paragraph_starts);
         Ok(formatted_words.join(""))
     }
 
