@@ -1,5 +1,3 @@
-use std::str::SplitWhitespace;
-
 use super::*;
 
 pub struct ParagraphsIter<'a> {
@@ -158,10 +156,11 @@ impl<'a> Paragraph<'a> {
     }
 }
 
+/// Internal function used to format a paragraph.
 #[inline(always)]
 #[allow(unreachable_code, clippy::too_many_arguments)]
 #[tailcall]
-fn paragraph_inner_format<'a>(
+pub fn paragraph_inner_format<'a, I>(
     indentation: usize,
     available_line_width: usize,
     mut result: Vec<&'a str>,
@@ -169,9 +168,12 @@ fn paragraph_inner_format<'a>(
     mut to_be_split: Vec<&'a str>,
     mut n_char: usize,
     mut split_len: usize,
-    mut splits: SplitWhitespace<'a>,
+    mut splits: I,
     mut drain_index: usize,
-) -> Vec<&'a str> {
+) -> Vec<&'a str>
+where
+    I: Iterator<Item = &'a str>,
+{
     trace!(n_char, split_len, drain_index, ?split_points, ?to_be_split);
 
     if drain_index > 0 {
