@@ -1,8 +1,10 @@
 # ForMaT Text
 
-A diff-friendly text formatter that breaks lines on sensible punctuations and words to fit a line width.
+A diff-friendly text formatter that breaks lines on sensible punctuations and
+words to fit a line width.
 
-This is more useful to use with Git than `fmt` because the formatting is more consistent, resulting in smaller diffs.
+This is more useful to use with Git than `fmt` because
+the formatting is more consistent, resulting in smaller diffs.
 
 - Respect line width limit.
 - Prioritize splitting on
@@ -41,7 +43,7 @@ Usage: fmtt [OPTIONS]
 Options:
 -w, --line-width <LINE_WIDTH>
           Maximum line width limit.
-          
+
           [default: 80]
 
   -f, --filename <FILENAME>
@@ -167,6 +169,9 @@ content
     not a header.
 
 ```
+
+For a full Markdown formatter, see [FMTM](https://github.com/SichangHe/fmtm).
+FMTM is used to format this document.
 
 LaTeX-friendly mode:
 
