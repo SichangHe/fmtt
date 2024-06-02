@@ -2,6 +2,6 @@
 source: src/tests/format.rs
 expression: "&markdown_formatted"
 ---
-First,
-I updated the `DATASET_URL` environment variable for the ML container in
-`k8s-tasks.yml` to point to the second dataset rather than the first.
+First, I updated the `DATASET_URL`
+environment variable for the ML container in `k8s-tasks.yml`
+to point to the second dataset rather than the first.

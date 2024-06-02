@@ -3,8 +3,8 @@ source: src/tests/format.rs
 expression: "&default_formatted"
 ---
 %Future work: Replace with real text.
-"Lorem ipsum dolor sit amet,
-consectetur adipiscing elit." is meaningless for most people.
+"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+is meaningless for most people.
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 Ut enim ad minim veniam,
