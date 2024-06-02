@@ -56,7 +56,22 @@ pub fn is_sentence_separator(char: char) -> bool {
 pub fn is_sub_sentence_separator(char: char) -> bool {
     matches!(
         char,
-        ',' | ';' | ':' | '，' | '：' | '；' | ')' | '）' | '}' | '｝' | ']' | '］'
+        ',' | ';'
+            | ':'
+            | '，'
+            | '：'
+            | '；'
+            | ')'
+            | '）'
+            | '}'
+            | '｝'
+            | ']'
+            | '］'
+            | '`'
+            | '"'
+            | '”'
+            | '\''
+            | '’'
     )
 }
 
@@ -79,6 +94,11 @@ pub fn is_sub_sentence_start(char: char) -> bool {
             | '#'
             | '$'
             | '%'
+            | '`'
+            | '"'
+            | '“'
+            | '\''
+            | '‘'
     )
 }
 
