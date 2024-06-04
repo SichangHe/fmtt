@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3](https://github.com/SichangHe/fmtt/compare/v0.6.2...v0.6.3) - 2024-06-04
+
+### Other
+- quotes as sub-sentence starts&ends
+- mention fmtm
+
 ## [0.6.2](https://github.com/SichangHe/fmtt/compare/v0.6.1...v0.6.2) - 2024-05-30
 
 ### Added
