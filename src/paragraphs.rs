@@ -192,7 +192,7 @@ impl<'a> Paragraph<'a> {
             &mut Vec::with_capacity(line_width / 2),
             &mut 0,
             &mut 0,
-            &mut self.words.split_whitespace(),
+            &mut self.words.split_ascii_whitespace(),
             &mut 0,
         );
         result
