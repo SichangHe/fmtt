@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/SichangHe/fmtt/compare/v0.6.2...v0.7.0) - 2024-09-02
+
+### Fixed
+- only split on ASCII whitespace
+
+### Other
+- bump pyo3 to 0.22
+- quotes as sub-sentence starts&ends
+- mention fmtm
+
 ## [0.6.2](https://github.com/SichangHe/fmtt/compare/v0.6.1...v0.6.2) - 2024-05-30
 
 ### Added
