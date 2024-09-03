@@ -23,6 +23,7 @@ jobs:
           key: rust-${{ hashFiles('Cargo.toml') }}
       - uses: mozilla-actions/sccache-action@v0.0.3
       - run: cargo test --workspace
+      - run: cargo test --workspace -F=py
 
   clippy:
     runs-on: ubuntu-latest
@@ -38,6 +39,7 @@ jobs:
           key: rust-${{ hashFiles('Cargo.toml') }}
       - uses: mozilla-actions/sccache-action@v0.0.3
       - run: cargo clippy --workspace
+      - run: cargo clippy --workspace -F=py
 
   rustfmt:
     runs-on: ubuntu-latest
