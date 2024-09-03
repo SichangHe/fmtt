@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/SichangHe/fmtt/compare/v0.7.0...v0.8.0) - 2024-09-03
+
+### Added
+- [**breaking**] prefer long lines regardless of type of break
+
 ## [0.7.0](https://github.com/SichangHe/fmtt/compare/v0.6.2...v0.7.0) - 2024-09-02
 
 ### Fixed
