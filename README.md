@@ -9,8 +9,8 @@ the formatting is more consistent, resulting in smaller diffs.
 - Respect line width limit.
 - Prioritize splitting on
     1. sentence ends like `.`, then
-    1. sub-sentence ends like `,`, sub-sentence starts like `(`,
-        and sentence-connection words like `and`.
+    1. sub-sentence ends like `,`, sub-sentence starts like `(`, and
+        sentence-connection words like `and`.
 - Limited support for abbreviations using heuristics.
 
 ## Installation
