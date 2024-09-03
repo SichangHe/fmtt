@@ -9,9 +9,8 @@ the formatting is more consistent, resulting in smaller diffs.
 - Respect line width limit.
 - Prioritize splitting on
     1. sentence ends like `.`, then
-    1. sub-sentence ends like `,`, then
-    1. sub-sentence starts like `(`, and finally
-    1. sentence-connection words like `and`.
+    1. sub-sentence ends like `,`, sub-sentence starts like `(`,
+        and sentence-connection words like `and`.
 - Limited support for abbreviations using heuristics.
 
 ## Installation
@@ -92,23 +91,19 @@ Meanwhile, the Research and Development team is deeply immersed in the execution
 " | fmtt
 
 The department heads will convene at 3 P.M. to engage in
-a comprehensive discussion regarding the second-quarter budget,
-and it is imperative that you bring your identification card for
-seamless access; subsequently,
-the Information Technology team is scheduled to
-conduct a software demonstration at 4 P.M.,
-with the esteemed presence of
+a comprehensive discussion regarding the second-quarter budget, and
+it is imperative that you bring your identification card for seamless access;
+subsequently, the Information Technology team is scheduled to
+conduct a software demonstration at 4 P.M., with the esteemed presence of
 Mr. Chief Executive Officer's beautiful personal assistant.
 
-In preparation for the impending meeting,
-a thorough review of the key performance indicators and return on
+In preparation for the impending meeting, a thorough review of
+the key performance indicators and return on
 investment is requested before the designated time of the meeting
-(which is set for 5 P.M.),
-and your prompt RSVP by 12 P.M. is kindly anticipated to ensure optimal
-(or at least as optimal as possible)
-coordination for the arrival of the very important persons at 2 P.M.!
-Furthermore,
-it is completely acceptable if you find yourself out of
+(which is set for 5 P.M.), and your prompt RSVP by
+12 P.M. is kindly anticipated to ensure optimal (or at least as optimal as
+possible) coordination for the arrival of the very important persons at 2 P.M.!
+Furthermore, it is completely acceptable if you find yourself out of
 the office during this period.
     Simultaneously,
     the Quality Assurance team is seeking your valuable input in relation to
@@ -117,17 +112,14 @@ the office during this period.
     A brief touch-base is suggested before the close of business hours to
     synchronize efforts and align objectives for maximum efficiency?
 
-Meanwhile,
-the Research and Development team is deeply immersed in the execution of
-a project shrouded in secrecy,
-with the exact estimated time of arrival for the project launch yet to
+Meanwhile, the Research and Development team is deeply immersed in
+the execution of a project shrouded in secrecy, with
+the exact estimated time of arrival for the project launch yet to
 be determined!
-Additionally,
-the Human Resources department requires your date of birth for
-the forthcoming birthday celebration,
-an event exclusively reserved for individuals of paramount importance,
-and your immediate response for attendance is highly encouraged.
-Enjoy the festivities!
+Additionally, the Human Resources department requires your date of birth for
+the forthcoming birthday celebration, an event exclusively reserved for
+individuals of paramount importance, and your immediate response for
+attendance is highly encouraged. Enjoy the festivities!
 
 ```
 
@@ -183,7 +175,7 @@ $ echo "
     \caption{Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.\texdtbf{lorem ipsum dolor sit amet}}
     \label{fig:lorem}
 \end{figure}
-" | fmtt
+" | fmtt -l
 
 \begin{figure}
     \centering
