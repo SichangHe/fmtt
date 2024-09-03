@@ -3,5 +3,5 @@ source: src/tests/format.rs
 expression: "&latex_formatted"
 ---
 For a color with linear red, green, blue values $r,g,b\in[0,1]$,
-hue $h\in[0,360)$, saturation $s\in[0,1]$, lightness $l\in[0,1]$,
-and grayscale $p\in[0,1]$:
+hue $h\in[0,360)$, saturation $s\in[0,1]$, lightness $l\in[0,1]$, and
+grayscale $p\in[0,1]$:

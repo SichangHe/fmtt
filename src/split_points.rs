@@ -73,12 +73,16 @@ impl Iterator for SplitPoints {
     type Item = SplitPoint;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let maybe_best_split_point = self
-            .parts_ordered_mut()
-            .into_iter()
-            .filter(|split_point| split_point.index > 0)
-            .map(|split_point| *split_point)
-            .next();
+        let candidates = self.parts_ordered_mut();
+        let maybe_best_split_point = if candidates[0].index > 0 {
+            Some(*candidates[0])
+        } else {
+            candidates
+                .into_iter()
+                .filter(|split_point| split_point.index > 0)
+                .map(|split_point| *split_point)
+                .max_by_key(|split_point| split_point.index)
+        };
         maybe_best_split_point.map(
             |split_point @ SplitPoint {
                  index,
